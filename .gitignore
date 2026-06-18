@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Data / secrets
+data/
+*.sqlite3
+*.db
+.env
+SECRETS.md
+
+# Frontend build artifacts
+frontend/dist/
+frontend/node_modules/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Migrations (optional: remove if you want them tracked)
+# migrations/

@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KedaiOps - Malaysia-First SME Operations & Receipt Checker</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --bg-surface: #151B2C;
+            --bg-surface-elevated: #1F273D;
+            --primary: #6366F1;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --accent: #10B981;
+            --accent-glow: rgba(16, 185, 129, 0.15);
+            --error: #EF4444;
+            --error-glow: rgba(239, 68, 68, 0.1);
+            --warning: #F59E0B;
+            --text-main: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --border-color: #242F49;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Layout & Navigation */
+        header {
+            background-color: rgba(21, 27, 44, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.025em;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--primary), #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse-green 2s infinite;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        /* Sidebar Panels */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: var(--transition-smooth);
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+        }
+
+        /* Main Workspace */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Grid Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-surface), #1A2338);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .stat-card.paid::after { background: var(--accent); }
+        .stat-card.unpaid::after { background: var(--warning); }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .btn {
+            width: 100%;
+            border-radius: 8px;
+            border: none;
+            padding: 0.75rem 1rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #4F46E5;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn-accent:hover {
+            background-color: #059669;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-muted);
+        }
+
+        /* Drag and Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 2rem 1rem;
+            text-align: center;
+            background-color: rgba(11, 15, 25, 0.4);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .drop-zone.active {
+            border-color: var(--primary);
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+
+        .drop-zone-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .drop-zone-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-zone input {
+            display: none;
+        }
+
+        /* Invoices Table & Grid lists */
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .data-table-container {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: rgba(11, 15, 25, 0.6);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            gap: 0.25rem;
+        }
+
+        .badge-draft { background-color: rgba(156, 163, 175, 0.1); color: var(--text-muted); border: 1px solid rgba(156, 163, 175, 0.2); }
+        .badge-sent { background-color: rgba(99, 102, 241, 0.1); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.2); }
+        .badge-paid { background-color: rgba(16, 185, 129, 0.1); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-overdue { background-color: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-duplicate { background-color: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+        .currency {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(7, 10, 17, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: var(--transition-smooth);
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        /* Processing spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .verification-detail-card {
+            border: 1px solid var(--border-color);
+            background: rgba(11, 15, 25, 0.3);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .verification-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .verification-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .verification-row .lbl {
+            color: var(--text-muted);
+        }
+
+        .verification-row .val {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .tab-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-container {
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Animations */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Flex wrap and alignments */
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .text-accent { color: var(--accent); }
+        .text-primary { color: var(--primary); }
+        .text-error { color: var(--error); }
+
+        /* Responsive Grid layouts */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">KO</div>
+                <span>KedaiOps</span>
+            </div>
+            <div class="status-badge">
+                <span class="status-indicator"></span>
+                <span>ResitJap Live API</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Left Sidebar: Actions & Inputs -->
+        <section class="sidebar">
+            
+            <!-- ResitJap Upload Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>ResitJap Receipt Check</span>
+                    <span class="badge badge-paid">DuitNow 0% Fee</span>
+                </div>
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-icon">📥</div>
+                    <p style="font-weight: 600; font-size: 0.9rem;">Drop bank receipt here</p>
+                    <p class="drop-zone-text">or click to browse from device</p>
+                    <input type="file" id="receiptFile" accept="image/*">
+                </div>
+                <div id="uploadProgress" style="display:none; margin-top:1rem;">
+                    <div class="loading-container">
+                        <div class="spinner"></div>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">AI Receipt Analysis running...</p>
+                    </div>
+                </div>
+                <div id="uploadResult" style="display:none; margin-top:1rem;">
+                    <!-- Filled dynamically -->
+                </div>
+            </div>
+
+            <!-- WhatsApp Paste Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>WhatsApp Order Ingest</span>
+                    <span style="font-size: 1.25rem;">💬</span>
+                </div>
+                <div class="form-group">
+                    <label for="waText">Paste order message from chat</label>
+                    <textarea id="waText" class="form-control" rows="5" placeholder="Name: Ali&#10;Item: Nasi Lemak&#10;RM15.00&#10;Due: 2026-06-20"></textarea>
+                </div>
+                <button class="btn btn-primary" id="btnIngestWA">
+                    <span>Parse Order</span>
+                </button>
+                <div id="waResult" style="display:none; margin-top:1rem;" class="verification-detail-card">
+                    <!-- Filled dynamically -->
+                </div>
+            </div>
+
+            <!-- Add Customer Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span>New Customer</span>
+                    <span>👤</span>
+                </div>
+                <form id="customerForm">
+                    <div class="form-group">
+                        <label for="custName">Customer Name *</label>
+                        <input type="text" id="custName" class="form-control" required placeholder="Hafiz bin Ahmad">
+                    </div>
+                    <div class="form-group">
+                        <label for="custPhone">Phone Number</label>
+                        <input type="text" id="custPhone" class="form-control" placeholder="+60123456789">
+                    </div>
+                    <div class="form-group">
+                        <label for="custTin">LHDN TIN (Optional)</label>
+                        <input type="text" id="custTin" class="form-control" placeholder="IG1234567890">
+                    </div>
+                    <button type="submit" class="btn btn-outline">Save Customer</button>
+                </form>
+            </div>
+
+        </section>
+
+        <!-- Right Workspace: Stats & Lists -->
+        <section class="workspace">
+            
+            <!-- Statistics Row -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Invoices</div>
+                    <div class="stat-value" id="statTotalInvoices">0</div>
+                </div>
+                <div class="stat-card paid">
+                    <div class="stat-label">Total Paid (0% Fee)</div>
+                    <div class="stat-value" id="statPaidAmount">RM0.00</div>
+                </div>
+                <div class="stat-card unpaid">
+                    <div class="stat-label">Unpaid / Outstanding</div>
+                    <div class="stat-value" id="statUnpaidAmount">RM0.00</div>
+                </div>
+            </div>
+
+            <!-- Tabs selector -->
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="switchTab('tab-invoices')">Invoice Queue</button>
+                <button class="tab-btn" onclick="switchTab('tab-receipts')">Verification History</button>
+                <button class="tab-btn" onclick="switchTab('tab-customers')">Customer Directory</button>
+            </div>
+
+            <!-- Tab: Invoices -->
+            <div id="tab-invoices" class="tab-content active">
+                <div class="section-title">
+                    <span>Active Invoices</span>
+                    <button class="btn btn-accent" style="width:auto; padding: 0.5rem 1rem;" onclick="openNewInvoiceModal()">+ Create Invoice</button>
+                </div>
+                <div class="data-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice ID</th>
+                                <th>Customer</th>
+                                <th>Item / Description</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Receipts -->
+            <div id="tab-receipts" class="tab-content">
+                <div class="section-title">
+                    <span>ResitJap Verification Audits</span>
+                </div>
+                <div class="data-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Verify ID</th>
+                                <th>Extracted Ref</th>
+                                <th>Bank</th>
+                                <th>Amount</th>
+                                <th>Recipient</th>
+                                <th>Created</th>
+                                <th>Verdict</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receiptsTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Customers -->
+            <div id="tab-customers" class="tab-content">
+                <div class="section-title">
+                    <span>Customer List</span>
+                </div>
+                <div class="data-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>LHDN TIN</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Modal: Create Invoice -->
+    <div class="modal-overlay" id="invoiceModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="font-display">New Invoice</h3>
+                <button class="modal-close" onclick="closeNewInvoiceModal()">&times;</button>
+            </div>
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label for="invCustomer">Customer *</label>
+                    <select id="invCustomer" class="form-control" required>
+                        <!-- Injected dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invNumber">Invoice Reference Number *</label>
+                    <input type="text" id="invNumber" class="form-control" required placeholder="KO-1002">
+                </div>
+                <div class="form-group">
+                    <label for="invDesc">Description / Service *</label>
+                    <input type="text" id="invDesc" class="form-control" required placeholder="Nasi Lemak Event Catering">
+                </div>
+                <div class="form-group">
+                    <label for="invAmount">Amount (RM) *</label>
+                    <input type="number" id="invAmount" class="form-control" required step="0.01" placeholder="150.00">
+                </div>
+                <div class="form-group">
+                    <label for="invDueDate">Due Date</label>
+                    <input type="date" id="invDueDate" class="form-control">
+                </div>
+                <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeNewInvoiceModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let lastMaxReceiptId = 0;
+        let isFirstLoad = true;
+
+        // Tab switching logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Modal triggers
+        function openNewInvoiceModal() {
+            document.getElementById('invoiceModalOverlay').classList.add('open');
+            // Populate select option list
+            loadCustomerSelectOptions();
+        }
+
+        function closeNewInvoiceModal() {
+            document.getElementById('invoiceModalOverlay').classList.remove('open');
+        }
+
+        // Drag and drop zone logic
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('receiptFile');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleReceiptUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleReceiptUpload(e.target.files[0]);
+            }
+        });
+
+        // API calls and UI renders
+        async function handleReceiptUpload(file) {
+            const progress = document.getElementById('uploadProgress');
+            const resultDiv = document.getElementById('uploadResult');
+            progress.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/receipts/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error('Upload verification failed.');
+                
+                const data = await response.json();
+                if (data.id) {
+                    lastMaxReceiptId = Math.max(lastMaxReceiptId, data.id);
+                }
+                renderReceiptResult(data);
+                refreshAll();
+            } catch (error) {
+                console.error(error);
+                resultDiv.innerHTML = `<div class="text-error" style="padding:1rem; border:1px solid var(--border-color); border-radius:8px;">Verification Error: ${error.message}</div>`;
+                resultDiv.style.display = 'block';
+            } finally {
+                progress.style.display = 'none';
+            }
+        }
+
+        function playSoundboxAlert(amount) {
+            if ('speechSynthesis' in window) {
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } catch (e) {
+                    console.error("Audio chime failed", e);
+                }
+
+                setTimeout(() => {
+                    const text = `DuitNow, RM ${amount.toFixed(2)} received`;
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.95;
+                    window.speechSynthesis.speak(utterance);
+                }, 400);
+            }
+        }
+
+        function renderReceiptResult(data) {
+            const resultDiv = document.getElementById('uploadResult');
+            resultDiv.style.display = 'block';
+
+            let statusClass = 'text-primary';
+            let statusText = data.status.toUpperCase();
+            
+            if (data.status === 'verified') {
+                statusClass = 'text-accent';
+                statusText = 'Verified Match ✓';
+                playSoundboxAlert(data.amount);
+            } else if (data.status === 'duplicate') {
+
+                statusClass = 'text-error';
+                statusText = 'DUPLICATE REFERENCE ⚠';
+            } else if (data.status === 'mismatch') {
+                statusClass = 'text-error';
+                statusText = 'UNPAID INVOICE NOT FOUND ⚠';
+            }
+
+            resultDiv.innerHTML = `
+                <div class="verification-detail-card" style="border-left: 4px solid ${data.status === 'verified' ? 'var(--accent)' : 'var(--error)'}">
+                    <p style="font-weight: 700; margin-bottom:0.5rem;" class="${statusClass}">${statusText}</p>
+                    <div class="verification-row">
+                        <span class="lbl">Recipient</span>
+                        <span class="val">${data.recipient_name || 'N/A'}</span>
+                    </div>
+                    <div class="verification-row">
+                        <span class="lbl">Amount</span>
+                        <span class="val">RM${data.amount !== null ? data.amount.toFixed(2) : '0.00'}</span>
+                    </div>
+                    <div class="verification-row">
+                        <span class="lbl">Bank/Wallet</span>
+                        <span class="val">${data.bank_name || 'N/A'}</span>
+                    </div>
+                    <div class="verification-row">
+                        <span class="lbl">Reference ID</span>
+                        <span class="val" style="font-family: monospace;">${data.reference_number || 'N/A'}</span>
+                    </div>
+                    ${data.matched_invoice_number ? `
+                    <div style="margin-top:0.75rem; padding-top:0.5rem; border-top: 1px solid var(--border-color); font-size:0.8rem;">
+                        <p class="text-accent" style="font-weight:600;">Matched Invoice: ${data.matched_invoice_number}</p>
+                        <p style="color:var(--text-muted);">Customer: ${data.matched_customer_name}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // WhatsApp parsing trigger
+        document.getElementById('btnIngestWA').addEventListener('click', async () => {
+            const rawText = document.getElementById('waText').value.trim();
+            if (!rawText) return;
+
+            const resDiv = document.getElementById('waResult');
+            resDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/ingest/whatsapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raw_text: rawText })
+                });
+
+                if (!response.ok) throw new Error('Ingest failed');
+                const data = await response.json();
+
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = `
+                    <p style="font-weight:700; font-size:0.85rem; color:var(--primary); margin-bottom:0.5rem;">Extracted Order Info</p>
+                    <div class="verification-row"><span class="lbl">Name</span><span class="val">${data.extracted_name || 'N/A'}</span></div>
+                    <div class="verification-row"><span class="lbl">Amount</span><span class="val">RM${data.extracted_amount !== null ? data.extracted_amount.toFixed(2) : '0.00'}</span></div>
+                    <div class="verification-row"><span class="lbl">Item</span><span class="val">${data.extracted_item || 'N/A'}</span></div>
+                    <div class="verification-row"><span class="lbl">Due</span><span class="val">${data.extracted_due_date || 'N/A'}</span></div>
+                    
+                    <button class="btn btn-outline" style="margin-top:0.75rem; padding: 0.35rem 0.5rem; font-size:0.75rem;" onclick="createNewInvoiceFromWA(${JSON.stringify(data).replace(/"/g, '&quot;')})">Create Invoice Card</button>
+                `;
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        // Helper to prompt invoice modal prefilled from parsed WhatsApp
+        async function createNewInvoiceFromWA(waData) {
+            openNewInvoiceModal();
+            
+            // Try to auto-select matching customer name if already exists, else we can suggest adding it
+            const selectEl = document.getElementById('invCustomer');
+            
+            // Match input fields
+            document.getElementById('invDesc').value = waData.extracted_item || '';
+            document.getElementById('invAmount').value = waData.extracted_amount || '';
+            document.getElementById('invDueDate').value = waData.extracted_due_date || '';
+            document.getElementById('invNumber').value = 'KO-' + Math.floor(1000 + Math.random() * 9000);
+        }
+
+        // Form Submit: Customer
+        document.getElementById('customerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('custName').value,
+                phone: document.getElementById('custPhone').value || null,
+                tin: document.getElementById('custTin').value || null
+            };
+
+            try {
+                const response = await fetch('/api/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error('Failed to create customer');
+                
+                document.getElementById('custName').value = '';
+                document.getElementById('custPhone').value = '';
+                document.getElementById('custTin').value = '';
+                
+                refreshAll();
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        // Form Submit: Invoice
+        document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                customer_id: parseInt(document.getElementById('invCustomer').value),
+                invoice_number: document.getElementById('invNumber').value,
+                item_description: document.getElementById('invDesc').value,
+                amount: parseFloat(document.getElementById('invAmount').value),
+                due_date: document.getElementById('invDueDate').value || null,
+                currency: 'MYR',
+                status: 'sent',
+                source_channel: 'manual'
+            };
+
+            try {
+                const response = await fetch('/api/invoices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error('Failed to create invoice');
+                
+                closeNewInvoiceModal();
+                document.getElementById('invoiceForm').reset();
+                refreshAll();
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        // Refresh utilities
+        async function refreshAll() {
+            loadDashboard();
+            loadInvoices();
+            loadReceiptsHistory();
+            loadCustomers();
+        }
+
+        async function loadDashboard() {
+            try {
+                const resp = await fetch('/api/dashboard');
+                const data = await resp.json();
+                document.getElementById('statTotalInvoices').textContent = data.total_invoices;
+                document.getElementById('statPaidAmount').textContent = `RM${data.paid_amount.toFixed(2)}`;
+                document.getElementById('statUnpaidAmount').textContent = `RM${data.unpaid_amount.toFixed(2)}`;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadInvoices() {
+            try {
+                const resp = await fetch('/api/invoices');
+                const invoices = await resp.json();
+                const tbody = document.getElementById('invoiceTableBody');
+                tbody.innerHTML = '';
+                
+                if (invoices.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No invoices found.</td></tr>`;
+                    return;
+                }
+
+                invoices.forEach(inv => {
+                    let badgeClass = 'badge-draft';
+                    if (inv.status === 'paid') badgeClass = 'badge-paid';
+                    else if (inv.status === 'sent') badgeClass = 'badge-sent';
+                    else if (inv.status === 'overdue') badgeClass = 'badge-overdue';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-family: monospace; font-weight:600;">${inv.invoice_number}</td>
+                            <td>${inv.customer_name}</td>
+                            <td>${inv.item_description}</td>
+                            <td><span class="currency">${inv.currency}</span> <strong>${inv.amount.toFixed(2)}</strong></td>
+                            <td>${inv.due_date || 'N/A'}</td>
+                            <td><span class="badge ${badgeClass}">${inv.status}</span></td>
+                            <td style="display:flex; gap:0.5rem;">
+                                <a href="/api/invoices/${inv.id}/myinvois" target="_blank" class="btn btn-outline" style="padding:0.25rem 0.5rem; font-size:0.75rem; width:auto; display:inline-flex; border-radius:6px;">e-Invoice</a>
+                                ${inv.status !== 'paid' ? `
+                                <button class="btn btn-primary" onclick="copyPaymentLink(${inv.id}, '${inv.customer_name.replace(/'/g, "\\'")}', ${inv.amount}, '${inv.invoice_number}')" style="padding:0.25rem 0.5rem; font-size:0.75rem; width:auto; display:inline-flex; border-radius:6px;">🔗 Link</button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadReceiptsHistory() {
+            try {
+                const resp = await fetch('/api/receipts');
+                const receipts = await resp.json();
+                const tbody = document.getElementById('receiptsTableBody');
+                tbody.innerHTML = '';
+
+                if (receipts.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No verification logs.</td></tr>`;
+                    return;
+                }
+
+                receipts.forEach(item => {
+                    const r = item.receipt;
+                    let badgeClass = 'badge-draft';
+                    if (r.status === 'verified') badgeClass = 'badge-paid';
+                    else if (r.status === 'duplicate') badgeClass = 'badge-overdue';
+                    else if (r.status === 'mismatch') badgeClass = 'badge-duplicate';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>#${r.id}</td>
+                            <td style="font-family: monospace; font-size: 0.8rem;">${r.reference_number || 'N/A'}</td>
+                            <td>${r.bank_name || 'N/A'}</td>
+                            <td><strong>RM${r.amount !== null ? r.amount.toFixed(2) : '0.00'}</strong></td>
+                            <td>${r.recipient_name || 'N/A'}</td>
+                            <td style="font-size:0.75rem; color:var(--text-muted);">${new Date(r.created_at + 'Z').toLocaleString('en-MY')}</td>
+                            <td><span class="badge ${badgeClass}">${r.status}</span></td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const resp = await fetch('/api/customers');
+                const customers = await resp.json();
+                const tbody = document.getElementById('customerTableBody');
+                tbody.innerHTML = '';
+
+                if (customers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No customers saved.</td></tr>`;
+                    return;
+                }
+
+                customers.forEach(cust => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${cust.id}</td>
+                            <td><strong>${cust.name}</strong></td>
+                            <td>${cust.phone || 'N/A'}</td>
+                            <td><span style="font-family:monospace;">${cust.tin || 'N/A'}</span></td>
+                            <td style="font-size:0.75rem; color:var(--text-muted);">${new Date(cust.created_at + 'Z').toLocaleString('en-MY')}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadCustomerSelectOptions() {
+            try {
+                const resp = await fetch('/api/customers');
+                const customers = await resp.json();
+                const select = document.getElementById('invCustomer');
+                select.innerHTML = '<option value="">-- Select Customer --</option>';
+                customers.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function copyPaymentLink(id, customerName, amount, invoiceNumber) {
+            const host = window.location.origin;
+            const payLink = `${host}/pay.html?id=${id}`;
+            const text = `Hi ${customerName},\n\nHere is your payment link for invoice ${invoiceNumber} (RM${amount.toFixed(2)}):\n👉 ${payLink}\n\nPlease scan the DuitNow QR code and upload your receipt screenshot to confirm payment.\n\nThank you!`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`Payment link copied to clipboard for ${customerName}!\nYou can paste it directly in WhatsApp.`);
+            }).catch(err => {
+                console.error("Copy failed", err);
+                prompt("Copy payment text manually:", text);
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            refreshAll();
+            
+            // Poll for receipt verification history updates every 4 seconds to simulate Soundbox
+            setInterval(async () => {
+                try {
+                    const resp = await fetch('/api/receipts');
+                    if (!resp.ok) return;
+                    const receipts = await resp.json();
+                    
+                    let currentMaxId = 0;
+                    let newVerifiedFound = false;
+                    let lastVerifiedAmount = 0;
+
+                    receipts.forEach(item => {
+                        const r = item.receipt;
+                        if (r.id > currentMaxId) {
+                            currentMaxId = r.id;
+                        }
+                        if (!isFirstLoad && lastMaxReceiptId > 0 && r.id > lastMaxReceiptId && r.status === 'verified') {
+                            newVerifiedFound = true;
+                            lastVerifiedAmount = r.amount;
+                        }
+                    });
+
+                    if (isFirstLoad) {
+                        lastMaxReceiptId = currentMaxId;
+                        isFirstLoad = false;
+                    } else if (newVerifiedFound) {
+                        lastMaxReceiptId = currentMaxId;
+                        refreshAll();
+                        // Trigger speech synthesis soundbox chime
+                        playSoundboxAlert(lastVerifiedAmount);
+                    } else if (currentMaxId > lastMaxReceiptId) {
+                        // Some other non-verified update occurred
+                        lastMaxReceiptId = currentMaxId;
+                        refreshAll();
+                    }
+                } catch (e) {
+                    console.error("Polling error:", e);
+                }
+            }, 4000);
+        });
+    </script>
+</body>
+</html>
