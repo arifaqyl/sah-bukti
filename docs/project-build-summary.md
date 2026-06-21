@@ -21,7 +21,7 @@ WhatsApp message
 - Cleaned the frontend story so the product is about reviewable evidence and clean books, not generic AI chat
 - Wired the React frontend to the live backend flow
 - Verified the live public domain and live WhatsApp session status
-- Built local helper tooling for Claude Opus video planning
+- Built demo tooling and local recording support for presentation prep
 - Created a Remotion video workspace for demo production
 
 ## Verified Product Behavior
