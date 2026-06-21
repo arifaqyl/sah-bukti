@@ -1,16 +1,16 @@
 # Sah.Bukti Challenges and Decisions
 
-## Biggest Challenges
+## Main Risks
 
-### 1. Preventing fake confidence
+### Preventing false payment confidence
 
-The biggest product risk was drifting into a system that looked automated but did not deserve trust.
+The main product risk was letting chat evidence look more authoritative than it really is.
 
 If chat messages or payment-looking input were allowed to update invoices directly, the product would become dangerous instead of useful.
 
-### 2. Keeping the product story narrow
+### Keeping scope narrow
 
-There was constant pressure for the product to become too many things at once:
+There was constant pressure for the product to drift into adjacent categories:
 
 - chatbot
 - invoicing app
@@ -18,15 +18,15 @@ There was constant pressure for the product to become too many things at once:
 - ERP
 - generic AI assistant
 
-That would have weakened the demo and the architecture.
+That would have weakened both the product story and the codebase.
 
-### 3. Frontend and backend drift
+### Frontend and backend drift
 
 At one point the UI story and the actual backend behavior were not cleanly aligned. Some surfaces implied more automation than the backend safely allowed.
 
-### 4. Demo realism versus demo safety
+### Public deployment versus private operations
 
-The live WhatsApp story is strong, but public access also creates risk. Demo surfaces needed to be believable without turning the public deployment into an unsafe open intake channel.
+The WhatsApp workflow is strongest when connected to a real owner-controlled number, but public deployment introduces connector and privacy risk. The public product surface needs to stay safe even when the private operator flow is stronger.
 
 ## Key Decisions
 
@@ -53,27 +53,26 @@ The project avoided overbuilding infrastructure and kept the data model grounded
 Sah.Bukti is not only about intake.
 The business value becomes obvious when approved records can be exported and handed off more cleanly.
 
-## What Was Cut
+## Cuts
 
 - generic AI assistant positioning
 - auto-confirm payment claims
 - overblown Sheets / Drive story
 - full accounting suite claims
 - ERP drift
-- public QR-based WhatsApp linking for the live demo path
+- public QR-based WhatsApp linking on the open product surface
 
-## What Remains Rough
+## Remaining Constraints
 
-- The GitHub repository slug still says `kedai-ops`
-- The live WhatsApp story is strongest in controlled demo conditions
-- Some secondary surfaces exist but are not the core wedge
-- The public site is good enough for judging, but the strongest story is still the guided demo
+- The repo path still uses `kedai-ops` locally
+- The strongest operator flow is still a controlled owner workflow, not an open public connector flow
+- Some secondary surfaces remain useful but are not part of the core wedge
 
-## Final Truth
+## Product Truth
 
-The winning version of Sah.Bukti is not “AI for accounting.”
+Sah.Bukti is not “AI for accounting.”
 
-The winning version is:
+The useful version is:
 
 forward messy WhatsApp evidence,
 review it,
