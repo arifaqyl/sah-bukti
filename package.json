@@ -2,7 +2,7 @@
   "name": "sahbukti-whatsapp-bridge",
   "private": true,
   "version": "0.1.0",
-  "description": "Local whatsapp-web.js bridge for Sah.Bukti Phase 2",
+  "description": "Optional local WhatsApp bridge for Sah.Bukti",
   "dependencies": {
     "express": "^4.21.2",
     "qrcode-terminal": "^0.12.0",

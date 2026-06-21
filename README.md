@@ -6,6 +6,8 @@ Sah.Bukti is a WhatsApp-first collections control plane for Malaysian micro-sell
 
 Live product: `https://arifaqyl.me/frontend/`
 
+Built during the Kracked Devs Vibe-a-thon as a focused operations product, not a generic hackathon wrapper.
+
 ## Core Flow
 
 ```text
@@ -63,7 +65,20 @@ month-end readiness
 - React + Vite frontend
 - WAHA-compatible WhatsApp integration
 
+## Repository Layout
+
+```text
+app/        FastAPI routes, schemas, services, database init
+client/     React/Vite frontend source
+frontend/   Built frontend assets served by FastAPI
+docs/       Product, architecture, security, and build notes
+scripts/    Local utilities and bridge scripts
+tests/      Backend test suite
+```
+
 ## Run Locally
+
+Backend:
 
 ```powershell
 cd D:\kedai-ops
@@ -71,11 +86,34 @@ cd D:\kedai-ops
 python -m uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000
 ```
 
+Frontend source build:
+
+```powershell
+cd D:\kedai-ops\client
+pnpm install
+pnpm build
+```
+
+Optional local WhatsApp bridge:
+
+```powershell
+cd D:\kedai-ops
+npm install
+node scripts/whatsapp_bridge.js
+```
+
 Open:
 
 ```text
 http://127.0.0.1:8000/frontend/
 ```
+
+## Node Tooling Notes
+
+- You do not need Node to run the FastAPI backend.
+- `client/` is the real frontend workspace and uses `pnpm`.
+- The root `package.json` is only for the optional local WhatsApp bridge.
+- If you only want the product backend and served frontend, use Python plus the already-built `frontend/` assets.
 
 ## Tests
 
@@ -90,6 +128,8 @@ cd D:\kedai-ops
 - [Architecture](docs/architecture.md)
 - [Trust and safety](docs/trust-and-safety.md)
 - [Challenges and decisions](docs/challenges-and-decisions.md)
+- [Repository structure](docs/repository-structure.md)
+- [Kracked Devs Vibe-a-thon build note](docs/krackeddevs-vibeathon.md)
 
 ## License
 
