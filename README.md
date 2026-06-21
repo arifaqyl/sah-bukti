@@ -6,9 +6,19 @@ Sah.Bukti is a WhatsApp-first collections control plane for Malaysian micro-sell
 
 Live product: `https://arifaqyl.me/frontend/`
 
-Built as a focused operations product for Malaysian micro-sellers, not a generic SaaS wrapper.
+## Why it exists
 
-## Core Flow
+Many micro-sellers already run their shop inside WhatsApp. Orders, payment claims, screenshots, and follow-up live in chat, memory, and spreadsheets.
+
+That creates three problems:
+
+- evidence gets buried
+- payment truth gets assumed too early
+- month-end handoff becomes cleanup work
+
+Sah.Bukti adds a control plane behind that workflow.
+
+## Core flow
 
 ```text
 WhatsApp message or imported evidence
@@ -26,15 +36,29 @@ accountant export
 month-end readiness
 ```
 
-## What It Does
+## What it does
 
 - Captures order text and payment intent as structured records
-- Keeps payment proofs in `needs_review` until an owner approves
+- Holds payment proofs in `needs_review` until an owner approves
 - Tracks invoices, customers, reminders, stock notes, and exports in one backend
 - Generates accountant-ready exports and month-end provision outputs
 - Serves a React frontend from the FastAPI app
 
-## Product Screens
+## Trust boundary
+
+- Inbound evidence never marks an invoice paid by itself
+- Payment-like input creates reviewable proof, not confirmed payment
+- Approval is the only mutation path for ledger truth
+- Export and readiness surfaces reflect approved state only
+
+## What it is not
+
+- Not a generic chatbot
+- Not a full accounting suite
+- Not an ERP
+- Not an autonomous bookkeeping agent
+
+## Product screens
 
 | Evidence intake | Review gate |
 | --- | --- |
@@ -44,39 +68,25 @@ month-end readiness
 | --- | --- |
 | ![Invoices](docs/screenshots/invoices.jpg) | ![Accountant export](docs/screenshots/export.jpg) |
 
-## Trust Boundary
-
-- Inbound evidence never marks an invoice paid by itself
-- Payment-like input creates reviewable proof, not confirmed payment
-- Approval is the only mutation path for ledger truth
-- Export and readiness surfaces reflect approved state only
-
-## What It Is Not
-
-- Not a generic chatbot
-- Not a full accounting suite
-- Not an ERP
-- Not an autonomous bookkeeping agent
-
 ## Stack
 
 - FastAPI
 - SQLite
-- React + Vite frontend
+- React + Vite
 - WAHA-compatible WhatsApp integration
 
-## Repository Layout
+## Repository layout
 
 ```text
 app/        FastAPI routes, schemas, services, database init
 client/     React/Vite frontend source
 frontend/   Built frontend assets served by FastAPI
-docs/       Product, architecture, security, and build notes
+docs/       Product and engineering documentation
 scripts/    Local utilities and bridge scripts
 tests/      Backend test suite
 ```
 
-## Run Locally
+## Run locally
 
 Backend:
 
@@ -86,7 +96,7 @@ cd D:\kedai-ops
 python -m uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000
 ```
 
-Frontend source build:
+Frontend build:
 
 ```powershell
 cd D:\kedai-ops\client
@@ -108,12 +118,12 @@ Open:
 http://127.0.0.1:8000/frontend/
 ```
 
-## Node Tooling Notes
+## Notes
 
-- You do not need Node to run the FastAPI backend.
+- You do not need Node to run the FastAPI backend itself.
 - `client/` is the real frontend workspace and uses `pnpm`.
-- The root `package.json` is only for the optional local WhatsApp bridge.
-- If you only want the product backend and served frontend, use Python plus the already-built `frontend/` assets.
+- The root `package.json` exists for the optional local WhatsApp bridge only.
+- If you only want the product backend and served frontend, Python plus the committed `frontend/` assets is enough.
 
 ## Tests
 
