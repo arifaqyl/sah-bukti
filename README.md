@@ -6,6 +6,14 @@ Sah.Bukti gives Malaysian micro-sellers a personal WhatsApp ops lane: capture or
 
 Status: `66/66` backend tests green. `3/3` demo scripts green.
 
+## Submission Docs
+
+- [Build log: Day 1 to Day 4](docs/day1-day4-build-log.md)
+- [Challenges and decisions](docs/challenges-and-decisions.md)
+- [Project build summary](docs/project-build-summary.md)
+- [Submission pack](docs/submission-pack.md)
+- [Demo transcript](docs/demo-transcript.txt)
+
 ## Product Truth
 
 Sah.Bukti is a backend-first collections ops system for Malaysian micro-SMEs.

@@ -15,6 +15,9 @@ SECRETS.md
 # Frontend build artifacts
 frontend/dist/
 frontend/node_modules/
+demo-video/node_modules/
+demo-video/out/
+demo-video/public/audio/
 
 # OS
 Thumbs.db

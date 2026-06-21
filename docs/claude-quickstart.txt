@@ -1,0 +1,18 @@
+Claude Opus local quickstart
+
+1. Double-click:
+   D:\kedai-ops\run-claude-opus-video.bat
+
+   That runs the Sah.Bukti video brief through Claude Opus and saves the result here:
+   D:\kedai-ops\docs\claude-video-opus-output.md
+
+2. For any custom prompt file:
+   D:\kedai-ops\run-claude-opus-custom.bat D:\path\to\your-prompt.txt
+
+3. Direct PowerShell command:
+   powershell -ExecutionPolicy Bypass -File D:\kedai-ops\scripts\claude_opus.ps1 -PromptFile D:\kedai-ops\docs\claude-video-brief.txt -OutputFile D:\kedai-ops\docs\claude-video-opus-output.md
+
+Model:
+   claude-opus-4.6
+
+Base URL and API key are already stored in your Windows user environment.
