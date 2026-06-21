@@ -15,8 +15,8 @@ export default function Evidence() {
   const [csv, setCsv] = useState("");
 
   async function postEvidence(path: string, body: Record<string, unknown>) {
-    const token = localStorage.getItem("kede_token");
-    const businessId = localStorage.getItem("kede_business_id");
+    const token = localStorage.getItem("sahbukti_token");
+    const businessId = localStorage.getItem("sahbukti_business_id");
     const useDemo = !token || !businessId;
     const query = useDemo ? "demo=1" : `business_id=${encodeURIComponent(businessId)}`;
 

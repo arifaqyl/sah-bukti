@@ -44,7 +44,6 @@ Product-facing and engineering-facing documentation:
 - architecture
 - trust boundary
 - repo structure
-- build note for the Kracked Devs Vibe-a-thon context
 
 ### `scripts/`
 

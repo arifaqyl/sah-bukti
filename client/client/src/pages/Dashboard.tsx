@@ -10,13 +10,13 @@ import { toast } from "sonner";
 const WELCOME_KEY = "sahbukti_welcome_dismissed";
 
 function currentBusinessQuery() {
-  const token = localStorage.getItem("kede_token");
-  const businessId = localStorage.getItem("kede_business_id");
+  const token = localStorage.getItem("sahbukti_token");
+  const businessId = localStorage.getItem("sahbukti_business_id");
   return token && businessId ? `business_id=${encodeURIComponent(businessId)}` : "demo=1";
 }
 
 function authHeaders() {
-  const token = localStorage.getItem("kede_token");
+  const token = localStorage.getItem("sahbukti_token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

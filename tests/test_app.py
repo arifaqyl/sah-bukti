@@ -35,7 +35,7 @@ def _auth_headers(token: str) -> dict:
     return {"authorization": f"Bearer {token}"}
 
 
-def test_core_kede_flow():
+def test_core_sahbukti_flow():
     async def run() -> None:
         reset_db()
         app = create_app()

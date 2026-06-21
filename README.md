@@ -6,7 +6,7 @@ Sah.Bukti is a WhatsApp-first collections control plane for Malaysian micro-sell
 
 Live product: `https://arifaqyl.me/frontend/`
 
-Built during the Kracked Devs Vibe-a-thon as a focused operations product, not a generic hackathon wrapper.
+Built as a focused operations product for Malaysian micro-sellers, not a generic SaaS wrapper.
 
 ## Core Flow
 
@@ -129,7 +129,6 @@ cd D:\kedai-ops
 - [Trust and safety](docs/trust-and-safety.md)
 - [Challenges and decisions](docs/challenges-and-decisions.md)
 - [Repository structure](docs/repository-structure.md)
-- [Kracked Devs Vibe-a-thon build note](docs/krackeddevs-vibeathon.md)
 
 ## License
 
