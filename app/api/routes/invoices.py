@@ -18,12 +18,8 @@ router = APIRouter()
 
 
 @router.get("/invoices", response_model=list[InvoiceResponse])
-def list_invoices_route(
-    limit: int = Query(default=50, le=200),
-    offset: int = Query(default=0, ge=0),
-    ctx: BusinessContext = Depends(get_business_context_demo),
-) -> list[dict]:
-    return list_invoices(ctx.business_id, limit=limit, offset=offset)
+def list_invoices_route(ctx: BusinessContext = Depends(get_business_context_demo)) -> list[dict]:
+    return list_invoices(ctx.business_id)
 
 
 @router.get("/invoices/export")

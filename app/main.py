@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -16,22 +15,6 @@ from app.services.cron import run_daily_close, run_monthly_provision, start_sche
 
 
 logger = logging.getLogger(__name__)
-
-
-def create_app() -> FastAPI:
-    init_db()
-    app = FastAPI(
-        title="Sah.Bukti",
-        version="0.1.0",
-        lifespan=lifespan,
-    )
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
 
 
 @asynccontextmanager

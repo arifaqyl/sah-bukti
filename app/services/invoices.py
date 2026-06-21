@@ -80,12 +80,7 @@ def list_invoices(business_id: int, limit: int = 50, offset: int = 0) -> list[di
                 invoices.items, invoices.subtotal, invoices.tax, invoices.total,
                 invoices.payment_method, invoices.payment_status, invoices.due_date,
                 invoices.paid_at, invoices.created_at, invoices.updated_at,
-                customers.name AS customer_name,
-                (
-                    SELECT COUNT(*)
-                    FROM payment_proofs pp
-                    WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-                ) AS pending_proof_count
+                customers.name AS customer_name
             FROM invoices
             JOIN customers ON customers.id = invoices.customer_id
             WHERE invoices.business_id = ?
@@ -103,12 +98,6 @@ def get_invoice(invoice_id: int, business_id: int | None = None) -> dict | None:
             row = conn.execute(
                 """
                 SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-                ,
-                (
-                    SELECT COUNT(*)
-                    FROM payment_proofs pp
-                    WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-                ) AS pending_proof_count
                 FROM invoices
                 JOIN customers ON customers.id = invoices.customer_id
                 WHERE invoices.id = ?
@@ -119,12 +108,6 @@ def get_invoice(invoice_id: int, business_id: int | None = None) -> dict | None:
             row = conn.execute(
                 """
                 SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-                ,
-                (
-                    SELECT COUNT(*)
-                    FROM payment_proofs pp
-                    WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-                ) AS pending_proof_count
                 FROM invoices
                 JOIN customers ON customers.id = invoices.customer_id
                 WHERE invoices.id = ? AND invoices.business_id = ?
@@ -140,12 +123,6 @@ def get_invoice_by_number(invoice_number: str, business_id: int | None = None) -
             row = conn.execute(
                 """
                 SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-                ,
-                (
-                    SELECT COUNT(*)
-                    FROM payment_proofs pp
-                    WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-                ) AS pending_proof_count
                 FROM invoices
                 JOIN customers ON customers.id = invoices.customer_id
                 WHERE invoices.invoice_number = ?
@@ -156,12 +133,6 @@ def get_invoice_by_number(invoice_number: str, business_id: int | None = None) -
             row = conn.execute(
                 """
                 SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-                ,
-                (
-                    SELECT COUNT(*)
-                    FROM payment_proofs pp
-                    WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-                ) AS pending_proof_count
                 FROM invoices
                 JOIN customers ON customers.id = invoices.customer_id
                 WHERE invoices.invoice_number = ? AND invoices.business_id = ?
@@ -257,12 +228,6 @@ def update_invoice(invoice_id: int, payload: dict, business_id: int | None = Non
         row = conn.execute(
             """
             SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-            ,
-            (
-                SELECT COUNT(*)
-                FROM payment_proofs pp
-                WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-            ) AS pending_proof_count
             FROM invoices
             JOIN customers ON customers.id = invoices.customer_id
             WHERE invoices.id = ?
@@ -296,12 +261,6 @@ def record_invoice_payment(invoice_id: int, payload: dict, business_id: int | No
                 row = conn.execute(
                     """
                     SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-                    ,
-                    (
-                        SELECT COUNT(*)
-                        FROM payment_proofs pp
-                        WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-                    ) AS pending_proof_count
                     FROM invoices
                     JOIN customers ON customers.id = invoices.customer_id
                     WHERE invoices.id = ?
@@ -348,12 +307,6 @@ def record_invoice_payment(invoice_id: int, payload: dict, business_id: int | No
         row = conn.execute(
             """
             SELECT invoices.*, customers.name AS customer_name, customers.email AS customer_email, customers.phone AS customer_phone
-            ,
-            (
-                SELECT COUNT(*)
-                FROM payment_proofs pp
-                WHERE pp.invoice_id = invoices.id AND pp.review_state = 'needs_review'
-            ) AS pending_proof_count
             FROM invoices
             JOIN customers ON customers.id = invoices.customer_id
             WHERE invoices.id = ?

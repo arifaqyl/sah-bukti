@@ -21,7 +21,6 @@ BAKERY_ITEMS = {
     "teh_tarik": {"name": "Teh Tarik", "unit_price": 2.50},
     "kuih_muih": {"name": "Kuih-Muih", "unit_price": 3.00},
 }
-DEMO_OWNER_PHONE = "60123456789"
 
 MALAYSIAN_METHODS = ["cash", "qr", "transfer"]
 
@@ -44,7 +43,7 @@ def ensure_business(conn):
             """,
             (
                 "Sah.Bukti Demo",
-                DEMO_OWNER_PHONE,
+                "60199798226",
                 "baker",
                 "reviewable evidence for Malaysian micro-sellers",
                 "#D4A853",
@@ -62,7 +61,7 @@ def ensure_business(conn):
         WHERE id = ?
         """,
         (
-            DEMO_OWNER_PHONE,
+            "60199798226",
             "reviewable evidence for Malaysian micro-sellers",
             "#D4A853",
             now,

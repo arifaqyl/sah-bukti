@@ -99,7 +99,7 @@ def _handle_whatsapp_webhook_payload(
     allowed_private_numbers = _resolve_allowed_private_numbers(business)
 
     # Private only, allow only explicitly trusted numbers.
-    if allowed_private_numbers and _normalize_phone(normalized["from_phone"]) not in allowed_private_numbers:
+    if _normalize_phone(normalized["from_phone"]) not in allowed_private_numbers:
         if normalized.get("media_type") != "text" or (normalized.get("media_metadata") or {}).get("has_media"):
             logger.info(
                 "WhatsApp webhook ignored not-allowed: allowed=%s normalized_from=%s chat_id=%s metadata=%s",

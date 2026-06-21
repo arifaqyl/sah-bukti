@@ -43,7 +43,6 @@ class InvoiceResponse(InvoiceCreate):
     customer_name: str | None = None
     customer_email: str | None = None
     customer_phone: str | None = None
-    pending_proof_count: int = 0
 
 
 class PaymentLinkResponse(BaseModel):
