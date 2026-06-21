@@ -1,14 +1,16 @@
-from app.db.store import get_db, get_default_business_id, utc_now
+from app.db.store import get_db, utc_now
 
 
 def create_ingredient(payload: dict) -> dict:
-    business_id = int(payload.get("business_id") or get_default_business_id())
+    if payload.get("business_id") is None:
+        raise ValueError("business_id is required")
+    business_id = int(payload["business_id"])
     now = utc_now()
     with get_db() as conn:
         cursor = conn.execute(
             """
-            INSERT INTO ingredients (business_id, name, unit, current_stock, reorder_point, supplier, last_updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO ingredients (business_id, name, unit, current_stock, reorder_point, supplier, notes, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 business_id,
@@ -17,6 +19,7 @@ def create_ingredient(payload: dict) -> dict:
                 payload.get("current_stock", 0),
                 payload.get("reorder_point", 0),
                 payload.get("supplier"),
+                payload.get("notes"),
                 now,
             ),
         )
@@ -33,39 +36,63 @@ def list_ingredients(business_id: int) -> list[dict]:
     return [dict(row) for row in rows]
 
 
-def update_ingredient(ingredient_id: int, payload: dict) -> dict | None:
+def update_ingredient(ingredient_id: int, payload: dict, business_id: int | None = None) -> dict | None:
     allowed = {
         "name": payload.get("name"),
         "unit": payload.get("unit"),
         "current_stock": payload.get("current_stock"),
         "reorder_point": payload.get("reorder_point"),
         "supplier": payload.get("supplier"),
+        "notes": payload.get("notes"),
     }
     updates = {key: value for key, value in allowed.items() if value is not None}
     if not updates:
-        return get_ingredient(ingredient_id)
+        return get_ingredient(ingredient_id, business_id)
 
     set_clause = ", ".join(f"{key} = ?" for key in updates)
     values = list(updates.values())
-    values.extend([utc_now(), ingredient_id])
+    values.append(utc_now())
 
     with get_db() as conn:
-        conn.execute(
-            f"""
-            UPDATE ingredients
-            SET {set_clause},
-                last_updated = ?
-            WHERE id = ?
-            """,
-            values,
-        )
-        row = conn.execute("SELECT * FROM ingredients WHERE id = ?", (ingredient_id,)).fetchone()
+        if business_id is None:
+            values.append(ingredient_id)
+            conn.execute(
+                f"""
+                UPDATE ingredients
+                SET {set_clause},
+                    last_updated = ?
+                WHERE id = ?
+                """,
+                values,
+            )
+            row = conn.execute("SELECT * FROM ingredients WHERE id = ?", (ingredient_id,)).fetchone()
+        else:
+            values.extend([ingredient_id, business_id])
+            conn.execute(
+                f"""
+                UPDATE ingredients
+                SET {set_clause},
+                    last_updated = ?
+                WHERE id = ? AND business_id = ?
+                """,
+                values,
+            )
+            row = conn.execute(
+                "SELECT * FROM ingredients WHERE id = ? AND business_id = ?",
+                (ingredient_id, business_id),
+            ).fetchone()
     return dict(row) if row else None
 
 
-def get_ingredient(ingredient_id: int) -> dict | None:
+def get_ingredient(ingredient_id: int, business_id: int | None = None) -> dict | None:
     with get_db() as conn:
-        row = conn.execute("SELECT * FROM ingredients WHERE id = ?", (ingredient_id,)).fetchone()
+        if business_id is None:
+            row = conn.execute("SELECT * FROM ingredients WHERE id = ?", (ingredient_id,)).fetchone()
+        else:
+            row = conn.execute(
+                "SELECT * FROM ingredients WHERE id = ? AND business_id = ?",
+                (ingredient_id, business_id),
+            ).fetchone()
     return dict(row) if row else None
 
 
@@ -93,6 +120,43 @@ def get_reorder_alerts(business_id: int) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def list_suppliers(business_id: int) -> list[dict]:
+    with get_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT
+                id,
+                name,
+                unit,
+                current_stock,
+                reorder_point,
+                supplier,
+                notes
+            FROM ingredients
+            WHERE business_id = ?
+            ORDER BY COALESCE(supplier, ''), name ASC, id DESC
+            """,
+            (business_id,),
+        ).fetchall()
+
+    grouped: dict[str, dict] = {}
+    for row in rows:
+        item = dict(row)
+        supplier_name = (item.get("supplier") or "").strip() or "Unassigned supplier"
+        if supplier_name not in grouped:
+            grouped[supplier_name] = {
+                "supplier": supplier_name,
+                "ingredient_count": 0,
+                "low_stock_count": 0,
+                "ingredients": [],
+            }
+        grouped[supplier_name]["ingredient_count"] += 1
+        if float(item["current_stock"]) <= float(item["reorder_point"]):
+            grouped[supplier_name]["low_stock_count"] += 1
+        grouped[supplier_name]["ingredients"].append(item)
+    return list(grouped.values())
+
+
 def update_stock(ingredient_id: int, quantity: float) -> bool:
     with get_db() as conn:
         result = conn.execute(
@@ -102,6 +166,15 @@ def update_stock(ingredient_id: int, quantity: float) -> bool:
             WHERE id = ?
             """,
             (quantity, utc_now(), ingredient_id),
+        )
+    return result.rowcount > 0
+
+
+def delete_ingredient(ingredient_id: int, business_id: int) -> bool:
+    with get_db() as conn:
+        result = conn.execute(
+            "DELETE FROM ingredients WHERE id = ? AND business_id = ?",
+            (ingredient_id, business_id),
         )
     return result.rowcount > 0
 

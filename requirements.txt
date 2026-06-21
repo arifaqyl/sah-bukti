@@ -5,3 +5,5 @@ httpx==0.28.1
 pytest==8.4.1
 python-multipart==0.0.12
 apscheduler==3.10.4
+fpdf2==2.8.5
+pypdf==5.6.1

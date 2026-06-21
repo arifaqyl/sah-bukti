@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class InvoiceCreate(BaseModel):
-    business_id: int = Field(default=1, ge=1)
+    business_id: int | None = Field(default=None, ge=1)
     customer_id: int = Field(ge=1)
     invoice_number: str = Field(min_length=1, max_length=50)
     items: list[dict] = Field(default_factory=list)
@@ -40,10 +40,30 @@ class InvoiceResponse(InvoiceCreate):
     paid_at: str | None = None
     created_at: str
     updated_at: str
+    customer_name: str | None = None
+    customer_email: str | None = None
+    customer_phone: str | None = None
+    pending_proof_count: int = 0
+
+
+class PaymentLinkResponse(BaseModel):
+    invoice_id: int
+    provider: str
+    payment_link_url: str | None = None
+    invoice_number: str
+    amount: float
+    whatsapp_text: str
+    instructions: str | None = None
+
+
+class PaymentWebhookResponse(BaseModel):
+    ok: bool
+    invoice_id: int | None = None
+    status: str
 
 
 class DailyCloseCreate(BaseModel):
-    business_id: int = Field(default=1, ge=1)
+    business_id: int | None = Field(default=None, ge=1)
     date: str = Field(min_length=1, max_length=20)
     total_cash: float = Field(default=0, ge=0)
     total_qr: float = Field(default=0, ge=0)

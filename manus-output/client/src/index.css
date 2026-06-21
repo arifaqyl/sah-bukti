@@ -1,0 +1,225 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   SAH.BUKTI — Anti-Slop "Paper & Ink" Design System
+   Warm paper background, clay accent, Fraunces + DM Sans.
+   Warm paper and clay palette. CSS-only surfaces.
+   ============================================================ */
+
+@theme inline {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-clay: var(--clay);
+  --color-clay-soft: var(--clay-soft);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+:root {
+  --radius: 1.1rem;
+
+  /* Warm paper palette */
+  --background: oklch(0.962 0.012 78);     /* #F5F1EB warm paper */
+  --foreground: oklch(0.235 0.006 60);     /* #1A1A1A ink */
+  --card: oklch(0.984 0.008 88);           /* #FDFBF7 surface */
+  --card-foreground: oklch(0.235 0.006 60);
+  --popover: oklch(0.984 0.008 88);
+  --popover-foreground: oklch(0.235 0.006 60);
+
+  /* Clay / terracotta accent */
+  --clay: oklch(0.586 0.135 38);           /* #C75B39 */
+  --clay-soft: oklch(0.92 0.045 50);       /* soft clay tint */
+  --primary: oklch(0.235 0.006 60);        /* ink primary buttons */
+  --primary-foreground: oklch(0.962 0.012 78);
+  --accent: oklch(0.586 0.135 38);
+  --accent-foreground: oklch(0.99 0.005 80);
+
+  --secondary: oklch(0.93 0.012 75);       /* chip */
+  --secondary-foreground: oklch(0.35 0.01 60);
+  --muted: oklch(0.93 0.012 75);
+  --muted-foreground: oklch(0.56 0.018 62); /* #8A7F72 earthy muted */
+
+  --success: oklch(0.5 0.09 155);
+  --warn: oklch(0.62 0.11 75);
+  --destructive: oklch(0.5 0.15 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.235 0.006 60 / 8%);
+  --input: oklch(0.235 0.006 60 / 12%);
+  --ring: oklch(0.586 0.135 38);
+
+  --chart-1: oklch(0.586 0.135 38);
+  --chart-2: oklch(0.5 0.09 155);
+  --chart-3: oklch(0.62 0.11 75);
+  --chart-4: oklch(0.56 0.018 62);
+  --chart-5: oklch(0.45 0.1 30);
+
+  --sidebar: oklch(0.984 0.008 88);
+  --sidebar-foreground: oklch(0.235 0.006 60);
+  --sidebar-primary: oklch(0.586 0.135 38);
+  --sidebar-primary-foreground: oklch(0.99 0.005 80);
+  --sidebar-accent: oklch(0.93 0.012 75);
+  --sidebar-accent-foreground: oklch(0.235 0.006 60);
+  --sidebar-border: oklch(0.235 0.006 60 / 8%);
+  --sidebar-ring: oklch(0.586 0.135 38);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Editorial headings in Fraunces */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href] {
+    @apply cursor-pointer;
+  }
+
+  /* Subtle CSS-only paper grain */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: radial-gradient(currentColor 1px, transparent 0);
+    background-size: 4px 4px;
+    color: var(--foreground);
+  }
+
+  ::selection {
+    background: var(--clay);
+    color: white;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+  @media (min-width: 640px) {
+    .container { padding-left: 2rem; padding-right: 2rem; }
+  }
+  @media (min-width: 1024px) {
+    .container { max-width: 1140px; }
+  }
+
+  .overline {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--muted-foreground);
+  }
+}
+
+@media (max-width: 375px) {
+  .phone {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+    padding: 18px;
+    border-radius: 36px;
+    overflow: hidden;
+  }
+  .phone-mock {
+    padding: 0;
+  }
+  .phone > * + * {
+    margin-top: 12px;
+  }
+}
+
+/* Handcrafted motion */
+@media (prefers-reduced-motion: no-preference) {
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: sahbukti-reveal 0.6s var(--ease-out) forwards;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.12s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.19s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.26s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.33s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+  .float { animation: sahbukti-float 6s ease-in-out infinite; }
+}
+
+@keyframes sahbukti-reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes sahbukti-float {
+  0%, 100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+@keyframes sahbukti-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-fade { animation: sahbukti-fade 0.4s var(--ease-out); }

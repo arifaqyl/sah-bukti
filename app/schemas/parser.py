@@ -9,7 +9,7 @@ class ParsedOrderItem(BaseModel):
 
 class ParseOrderRequest(BaseModel):
     text: str = Field(min_length=1)
-    business_id: int = Field(default=1, ge=1)
+    business_id: int | None = Field(default=None, ge=1)
 
 
 class ParseOrderResponse(BaseModel):

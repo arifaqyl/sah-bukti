@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KedaiOps - Secure Payment Link</title>
+    <title>Sah.Bukti - Secure Payment Link</title>
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -374,7 +374,7 @@
         <!-- Logo -->
         <div class="logo-header">
             <div class="logo-icon">KO</div>
-            <span>KedaiOps</span>
+            <span>Sah.Bukti</span>
         </div>
 
         <!-- Billing details Card -->
@@ -395,7 +395,7 @@
             <!-- Content state (Unpaid) -->
             <div id="billContent" style="display:none;">
                 <div class="bill-header">
-                    <p class="bill-merchant" id="merchantName">KedaiOps Vendor</p>
+                    <p class="bill-merchant" id="merchantName">Sah.Bukti Vendor</p>
                     <h2 class="bill-title" id="billTitle">Service Invoice</h2>
                     <div class="bill-amount-wrap">
                         <span class="bill-currency">RM</span>
@@ -419,7 +419,7 @@
                                 <span style="font-size: 0.6rem; color:#888; font-weight:600;">INSTANT TRANSFER</span>
                             </div>
                             <!-- Generate a beautiful DuitNow QR placeholder -->
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=DuitNow-Pay-KedaiOps" alt="DuitNow QR Code" class="qr-image" id="qrImg">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=DuitNow-Pay-Sah.Bukti" alt="DuitNow QR Code" class="qr-image" id="qrImg">
                             <p class="qr-label">PROXIMITY INTEGRITY VERIFIED</p>
                         </div>
                     </div>
@@ -436,7 +436,7 @@
                     <div id="uploadProgress" style="display:none; margin-top:1rem;">
                         <div class="loading-container">
                             <div class="spinner"></div>
-                            <p style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">ResitJap AI Vision analyzing receipt...</p>
+                            <p style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">Sah.Bukti AI Vision analyzing receipt...</p>
                         </div>
                     </div>
 
@@ -484,7 +484,7 @@
         </div>
 
         <footer>
-            <span>Powered by <a href="/">KedaiOps</a> &copy; 2026</span>
+            <span>Powered by <a href="/">Sah.Bukti</a> &copy; 2026</span>
         </footer>
     </div>
 
@@ -530,7 +530,7 @@
             document.getElementById('initLoader').style.display = 'none';
             document.getElementById('billContent').style.display = 'block';
 
-            document.getElementById('merchantName').textContent = invoiceData.source_channel === 'whatsapp' ? 'WhatsApp Order' : 'KedaiOps Vendor';
+            document.getElementById('merchantName').textContent = invoiceData.source_channel === 'whatsapp' ? 'WhatsApp Order' : 'Sah.Bukti Vendor';
             document.getElementById('billTitle').textContent = invoiceData.item_description;
             document.getElementById('billAmount').textContent = invoiceData.amount.toFixed(2);
             
@@ -541,7 +541,7 @@
 
             if (invoiceData.status === 'paid') {
                 showSuccessLayout({
-                    recipient_name: 'KedaiOps Merchant',
+                    recipient_name: 'Sah.Bukti Merchant',
                     amount: invoiceData.amount,
                     bank_name: 'Direct Gateway',
                     reference_number: 'ALREADY-PAID',
@@ -624,7 +624,7 @@
             badge.className = 'status-badge paid';
             badge.innerHTML = `<span style="font-size:0.65rem;">●</span> Paid`;
 
-            document.getElementById('resRecipient').textContent = data.recipient_name || 'KedaiOps Merchant';
+            document.getElementById('resRecipient').textContent = data.recipient_name || 'Sah.Bukti Merchant';
             document.getElementById('resAmount').textContent = `RM${parseFloat(data.amount).toFixed(2)}`;
             document.getElementById('resBank').textContent = data.bank_name || 'N/A';
             document.getElementById('resRef').textContent = data.reference_number || 'N/A';

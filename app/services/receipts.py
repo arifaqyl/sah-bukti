@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import uuid
 from pathlib import Path
 
 import httpx
@@ -312,7 +313,7 @@ def _extract_with_gemini(base64_image: str, mime_type: str, prompt: str) -> tupl
 
 def _build_mock_extraction() -> tuple[dict, str]:
     extracted_data = {
-        "recipient_name": "KedaiOps Merchant",
+        "recipient_name": "Sah.Bukti Merchant",
         "bank_name": "MAE (Mock)",
         "transaction_time": utc_now().replace("T", " ")[:19],
         "amount": 150.0,
@@ -352,3 +353,86 @@ def _receipt_prompt() -> str:
         "6. status: the transaction status, must be either 'SUCCESS' or 'FAILED'.\n\n"
         "Return ONLY a JSON object containing these keys. Do not include markdown code block formatting."
     )
+
+
+def generate_receipt_pdf(order_data: dict) -> str:
+    """Generate a simple Sah.Bukti PDF receipt and store its file path."""
+    try:
+        from fpdf import FPDF
+    except ImportError as exc:  # pragma: no cover - dependency guard
+        raise RuntimeError("fpdf2 is required for receipt PDF generation") from exc
+
+    order_id = str(order_data["order_id"])
+    customer_name = str(order_data.get("customer_name") or "Customer")
+    phone = str(order_data.get("phone") or "")
+    items = order_data.get("items") or []
+    total = float(order_data.get("total") or 0.0)
+    if total <= 0 and items:
+        total = sum(float(item.get("qty") or 0) * float(item.get("price") or 0) for item in items)
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.cell(0, 10, "SAH.BUKTI", ln=True, align="C")
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 6, "Bukti Pesanan Sah", ln=True, align="C")
+    pdf.ln(5)
+
+    pdf.cell(0, 6, f"No. Pesanan: {order_id}", ln=True)
+    pdf.cell(0, 6, f"Tarikh: {order_data.get('date') or utc_now()[:10]}", ln=True)
+    pdf.cell(0, 6, f"Nama: {customer_name}", ln=True)
+    pdf.cell(0, 6, f"No. Telefon: {phone}", ln=True)
+    pdf.ln(5)
+
+    pdf.set_fill_color(230, 230, 230)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(80, 8, "Item", 1, 0, "C", True)
+    pdf.cell(25, 8, "Qty", 1, 0, "C", True)
+    pdf.cell(35, 8, "Harga", 1, 0, "C", True)
+    pdf.cell(35, 8, "Total", 1, 1, "C", True)
+    pdf.set_font("Helvetica", "", 10)
+    for item in items:
+        qty = float(item.get("qty") or 0)
+        price = float(item.get("price") or 0)
+        pdf.cell(80, 8, str(item.get("name") or "Item")[:36], 1)
+        pdf.cell(25, 8, f"{qty:g}", 1, 0, "C")
+        pdf.cell(35, 8, f"{price:.2f}", 1, 0, "R")
+        pdf.cell(35, 8, f"{qty * price:.2f}", 1, 1, "R")
+
+    pdf.ln(3)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(140, 8, "Jumlah:", 0, 0, "R")
+    pdf.cell(35, 8, f"RM{total:.2f}", 0, 1, "R")
+    pdf.ln(8)
+    pdf.set_font("Helvetica", "", 9)
+    pdf.cell(0, 6, str(order_data.get("payment_info") or "Pembayaran: QR / bank transfer"), ln=True, align="C")
+    pdf.cell(0, 6, "Terima kasih! - Sah.Bukti", ln=True, align="C")
+
+    output_dir = UPLOADS_DIR / "receipts"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"receipt_{_safe_filename(order_id)}.pdf"
+    pdf.output(str(output_path))
+
+    with get_db() as conn:
+        conn.execute(
+            """
+            INSERT INTO receipts (id, business_id, proof_id, invoice_id, file_path, sent_to_phone, sent_at, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                str(order_data.get("id") or uuid.uuid4()),
+                int(order_data.get("business_id") or 1),
+                order_data.get("proof_id"),
+                order_data.get("invoice_id"),
+                str(output_path),
+                phone or None,
+                order_data.get("sent_at"),
+                utc_now(),
+            ),
+        )
+    return str(output_path)
+
+
+def _safe_filename(value: str) -> str:
+    return "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in value)[:80]

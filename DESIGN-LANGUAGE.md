@@ -1,4 +1,4 @@
-# Kede — Design Language Reference
+# Sah.Bukti — Design Language Reference
 
 **Version:** 1.0  
 **Date:** 2026-06-18  
@@ -9,7 +9,7 @@
 
 ## 1. Brand Personality
 
-Kede is NOT a sterile corporate dashboard. It's a warm, artisanal tool for a baker who wakes up at 4am and an accountant who works late nights.
+Sah.Bukti is NOT a sterile corporate dashboard. It's a warm, artisanal tool for a baker who wakes up at 4am and an accountant who works late nights.
 
 **Keywords:** Warm brass, morning light, charcoal warmth, craft precision, readable at 1am, Malaysian small-business soul.
 
@@ -172,7 +172,7 @@ Base size: 16px. Scale ratio: 1.25 (major third).
 
 ### 5.2 Shadows / Elevation
 
-Kede uses layered surface separation, not generic shadows.
+Sah.Bukti uses layered surface separation, not generic shadows.
 
 | Level | Token | Usage |
 |-------|-------|-------|
@@ -338,7 +338,7 @@ This is the most important page. It's the demo moment. Design it with extra care
 
 ## 9. What Makes This NOT "AI Slop"
 
-| AI Slop Pattern | Kede Decision |
+| AI Slop Pattern | Sah.Bukti Decision |
 |-----------------|---------------|
 | Pure `#ffffff` / `#000000` | Tinted backgrounds (`#0f0f14`, `#f5f0e8`) |
 | Blue-indigo-violet primary | Warm brass `#d4a853` |

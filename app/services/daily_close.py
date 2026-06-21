@@ -1,8 +1,10 @@
-from app.db.store import get_db, get_default_business_id, utc_now
+from app.db.store import get_db, utc_now
 
 
 def create_daily_close(payload: dict) -> dict:
-    business_id = int(payload.get("business_id") or get_default_business_id())
+    if payload.get("business_id") is None:
+        raise ValueError("business_id is required")
+    business_id = int(payload["business_id"])
     with get_db() as conn:
         cursor = conn.execute(
             """
@@ -36,28 +38,30 @@ def create_daily_close(payload: dict) -> dict:
     return dict(row)
 
 
-def list_daily_close() -> list[dict]:
+def list_daily_close(business_id: int) -> list[dict]:
     with get_db() as conn:
         rows = conn.execute(
             """
             SELECT *
             FROM daily_ops
+            WHERE business_id = ?
             ORDER BY date DESC, id DESC
-            """
+            """,
+            (business_id,),
         ).fetchall()
     return [dict(row) for row in rows]
 
 
-def get_daily_close(date: str) -> dict | None:
+def get_daily_close(date: str, business_id: int) -> dict | None:
     with get_db() as conn:
         row = conn.execute(
             """
             SELECT *
             FROM daily_ops
-            WHERE date = ?
+            WHERE date = ? AND business_id = ?
             ORDER BY id DESC
             LIMIT 1
             """,
-            (date,),
+            (date, business_id),
         ).fetchone()
     return dict(row) if row else None

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sah.Bukti</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #fff; color: #000; }
+    .err { color: #c00; background: #fee; padding: 10px; margin: 10px 0; border: 1px solid #c00; }
+    .ok { color: #080; background: #efe; padding: 10px; margin: 10px 0; border: 1px solid #080; }
+  </style>
+</head>
+<body>
+  <h1>Sah.Bukti Diagnostic</h1>
+  <div id="status"></div>
+  <div id="app" style="margin-top:20px; border:1px dashed #999; padding:10px;">
+    <p style="color:#999;">#app container (content should appear here)</p>
+  </div>
+
+  <script>
+    var status = document.getElementById('status');
+    function log(msg, isErr) {
+      var div = document.createElement('div');
+      div.className = isErr ? 'err' : 'ok';
+      div.textContent = (isErr ? 'ERROR: ' : 'OK: ') + msg;
+      status.appendChild(div);
+    }
+  </script>
+
+  <script src="/frontend/js/api.js" onerror="log('api.js failed to load', true)"></script>
+  <script>
+    try { log('api.js loaded, API_BASE=' + (typeof API_BASE !== 'undefined' ? API_BASE : 'undefined')); }
+    catch(e) { log('api.js error: ' + e.message, true); }
+  </script>
+
+  <script src="/frontend/js/router.js" onerror="log('router.js failed to load', true)"></script>
+  <script>
+    try { log('router.js loaded, routes count=' + Object.keys(typeof routes !== 'undefined' ? routes : {}).length); }
+    catch(e) { log('router.js error: ' + e.message, true); }
+  </script>
+
+  <script src="/frontend/js/app.js" onerror="log('app.js failed to load', true)"></script>
+  <script>
+    try {
+      log('app.js loaded, APP.init exists=' + (typeof APP !== 'undefined' && typeof APP.init === 'function'));
+      if (typeof APP !== 'undefined' && typeof APP.init === 'function') {
+        APP.init().then(function() { log('APP.init() completed', false); }).catch(function(e) { log('APP.init() rejected: ' + e.message, true); });
+      }
+    } catch(e) { log('app.js sync error: ' + e.message, true); }
+  </script>
+
+  <script src="/frontend/js/dashboard.js" onerror="log('dashboard.js failed to load', true)"></script>
+  <script>
+    try { log('dashboard.js loaded, Dashboard=' + (typeof Dashboard !== 'undefined' ? 'yes' : 'no')); }
+    catch(e) { log('dashboard.js error: ' + e.message, true); }
+  </script>
+
+  <script src="/frontend/js/invoices.js" onerror="log('invoices.js failed to load', true)"></script>
+  <script>
+    try { log('invoices.js loaded, Invoices=' + (typeof Invoices !== 'undefined' ? 'yes' : 'no')); }
+    catch(e) { log('invoices.js error: ' + e.message, true); }
+  </script>
+
+  <script src="/frontend/js/inventory.js" onerror="log('inventory.js failed to load', true)"></script>
+  <script src="/frontend/js/provision.js" onerror="log('provision.js failed to load', true)"></script>
+
+  <script>
+    setTimeout(function() {
+      var appEl = document.getElementById('app');
+      var inner = appEl ? appEl.innerHTML.trim() : 'null';
+      log('After 2s, #app innerHTML length=' + inner.length + (inner.length === 0 ? ' (EMPTY - this is the bug)' : ''));
+    }, 2000);
+  </script>
+</body>
+</html>

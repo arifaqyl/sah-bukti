@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sah.Bukti Day 2 - Voice Evidence Proof</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #111827;
+      --panel-2: #0f172a;
+      --border: rgba(255,255,255,0.10);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --green: #22c55e;
+      --amber: #d4a853;
+      --blue: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.10), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(212,168,83,0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: Consolas, "SFMono-Regular", Menlo, Monaco, monospace;
+    }
+    .frame {
+      width: 1600px;
+      height: 900px;
+      padding: 48px;
+    }
+    .eyebrow {
+      color: var(--amber);
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 54px;
+      line-height: 1.05;
+      font-weight: 700;
+    }
+    .sub {
+      color: var(--muted);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 24px;
+      line-height: 1.45;
+      max-width: 1120px;
+      margin-bottom: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(17,24,39,0.94), rgba(15,23,42,0.96));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+    }
+    .terminal-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 999px; }
+    .red { background: #ef4444; }
+    .yellow { background: #f59e0b; }
+    .green { background: #22c55e; }
+    .terminal-title {
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    pre {
+      margin: 0;
+      padding: 24px 28px 28px;
+      font-size: 24px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .side {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .side-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.02);
+    }
+    .label {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .value {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 30px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+    .value.small {
+      font-size: 22px;
+      line-height: 1.35;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .accent { color: var(--green); }
+    .blue { color: var(--blue); }
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="eyebrow">Day 2 Proof</div>
+    <h1>Voice note becomes reviewable evidence first</h1>
+    <div class="sub">This is the exact control point: evidence comes in, review happens, and only approval changes invoice and payment state.</div>
+    <div class="grid">
+      <div class="card">
+        <div class="terminal-top">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">demo_whatsapp_evidence.py</span>
+        </div>
+        <pre>1. Seed invoice created: INV-DEMO-001 status=pending
+2. Voice note created proof: proof_id=1 state=needs_review
+3. Invoice still unchanged before approval: status=pending
+4. Proof approved: state=auto_approved payment_id=1
+5. Invoice after approval: status=paid
+6. Month-end readiness: {"status": "ready", "score": 92, "pending_proof_count": 0}
+7. Accountant export summary: {"invoice_count": 1, "paid_total": 45.0, "proof_needs_review_count": 0}</pre>
+      </div>
+      <div class="side card">
+        <div class="side-card">
+          <div class="label">Flow</div>
+          <div class="value small">Voice note transcript → proof record → owner approval → safe ledger update</div>
+        </div>
+        <div class="side-card">
+          <div class="label">Guardrail</div>
+          <div class="value accent">AI suggests. Owner approves.</div>
+        </div>
+        <div class="side-card">
+          <div class="label">Result</div>
+          <div class="value blue">Readiness and export update only after approval</div>
+        </div>
+        <div class="footer">backend demo proof</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

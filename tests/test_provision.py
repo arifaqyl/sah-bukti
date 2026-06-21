@@ -6,13 +6,14 @@ from httpx import ASGITransport, AsyncClient
 from app.db.store import reset_db
 from app.main import create_app
 from app.services.aging import AgingService
+from app.services.auth import list_memberships
 from app.services.customers import create_customer
 from app.services.invoices import create_invoice
 from app.services.provision import ProvisionEngine
 
 
-def _seed_bucket_invoices() -> None:
-    customer = create_customer({"name": "Provision Customer", "phone": "60110000000"})
+def _seed_bucket_invoices(business_id: int = 1) -> None:
+    customer = create_customer({"business_id": business_id, "name": "Provision Customer", "phone": "60110000000"})
     invoices = [
         ("INV-CUR", 100.0, "2026-06-25"),
         ("INV-3160", 200.0, "2026-05-10"),
@@ -23,6 +24,7 @@ def _seed_bucket_invoices() -> None:
     for invoice_number, total, due_date in invoices:
         create_invoice(
             {
+                "business_id": business_id,
                 "customer_id": customer["id"],
                 "invoice_number": invoice_number,
                 "items": [{"name": invoice_number, "quantity": 1, "unit_price": total}],
@@ -34,6 +36,21 @@ def _seed_bucket_invoices() -> None:
                 "due_date": due_date,
             }
         )
+
+
+async def _signup(client: AsyncClient) -> tuple[str, int]:
+    response = await client.post(
+        "/api/v1/auth/signup",
+        json={"email": "provision-owner@example.com", "password": "password123", "business_name": "Provision Biz"},
+    )
+    assert response.status_code == 201
+    payload = response.json()
+    memberships = list_memberships(payload["user"]["id"])
+    return payload["access_token"], memberships[0]["business_id"]
+
+
+def _auth_headers(token: str) -> dict:
+    return {"authorization": f"Bearer {token}"}
 
 
 def test_calculate_provision_with_default_policy():
@@ -98,9 +115,10 @@ def test_aging_buckets():
 
 def test_zero_provision_when_no_overdue():
     reset_db()
-    customer = create_customer({"name": "Current Customer", "phone": "60112223333"})
+    customer = create_customer({"business_id": 1, "name": "Current Customer", "phone": "60112223333"})
     create_invoice(
         {
+            "business_id": 1,
             "customer_id": customer["id"],
             "invoice_number": "INV-ZERO",
             "items": [{"name": "Current", "quantity": 1, "unit_price": 250.0}],
@@ -118,9 +136,10 @@ def test_zero_provision_when_no_overdue():
 
 def test_full_provision_when_180_plus():
     reset_db()
-    customer = create_customer({"name": "Old Debt", "phone": "60114445555"})
+    customer = create_customer({"business_id": 1, "name": "Old Debt", "phone": "60114445555"})
     create_invoice(
         {
+            "business_id": 1,
             "customer_id": customer["id"],
             "invoice_number": "INV-OLD",
             "items": [{"name": "Old", "quantity": 1, "unit_price": 500.0}],
@@ -139,22 +158,35 @@ def test_full_provision_when_180_plus():
 def test_provision_api_happy_path():
     async def run() -> None:
         reset_db()
-        _seed_bucket_invoices()
         app = create_app()
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            aging_resp = await client.get("/api/v1/provision/aging", params={"business_id": 1, "month": "2026-06"})
+            token, business_id = await _signup(client)
+            _seed_bucket_invoices(business_id)
+            aging_resp = await client.get(
+                "/api/v1/provision/aging",
+                headers=_auth_headers(token),
+                params={"business_id": business_id, "month": "2026-06"},
+            )
             assert aging_resp.status_code == 200
             aging_data = aging_resp.json()
             assert len(aging_data["buckets"]) == 5
             assert aging_data["total_provision"] == 620.0
 
-            calc_resp = await client.get("/api/v1/provision/calculate", params={"business_id": 1, "month": "2026-06"})
+            calc_resp = await client.get(
+                "/api/v1/provision/calculate",
+                headers=_auth_headers(token),
+                params={"business_id": business_id, "month": "2026-06"},
+            )
             assert calc_resp.status_code == 200
             calc_data = calc_resp.json()
             assert calc_data["journal_entry"]["balanced"] is True
             assert calc_data["provision_amount"] == 620.0
 
-            export_resp = await client.get("/api/v1/provision/export", params={"business_id": 1, "month": "2026-06", "format": "csv"})
+            export_resp = await client.get(
+                "/api/v1/provision/export",
+                headers=_auth_headers(token),
+                params={"business_id": business_id, "month": "2026-06", "format": "csv"},
+            )
             assert export_resp.status_code == 200
             assert "text/csv" in export_resp.headers["content-type"]
             assert "Provision for Doubtful Debts - June 2026" in export_resp.text
@@ -167,21 +199,29 @@ def test_provision_api_empty_and_policy_override():
         reset_db()
         app = create_app()
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            empty_resp = await client.get("/api/v1/provision/aging", params={"business_id": 1, "month": "2026-06"})
+            token, business_id = await _signup(client)
+            empty_resp = await client.get(
+                "/api/v1/provision/aging",
+                headers=_auth_headers(token),
+                params={"business_id": business_id, "month": "2026-06"},
+            )
             assert empty_resp.status_code == 404
             assert empty_resp.json()["error"]["code"] == "no_data"
 
             policy_resp = await client.post(
                 "/api/v1/provision/policy",
-                json={"business_id": 1, "policy": {"31-60": 0.25, "180+": 0.8}},
+                headers=_auth_headers(token),
+                params={"business_id": business_id},
+                json={"business_id": business_id, "policy": {"31-60": 0.25, "180+": 0.8}},
             )
             assert policy_resp.status_code == 200
             assert policy_resp.json()["policy"]["31-60"] == 0.25
 
-            _seed_bucket_invoices()
+            _seed_bucket_invoices(business_id)
             calc_resp = await client.get(
                 "/api/v1/provision/calculate",
-                params={"business_id": 1, "month": "2026-06", "policy": json.dumps({"31-60": 0.25})},
+                headers=_auth_headers(token),
+                params={"business_id": business_id, "month": "2026-06", "policy": json.dumps({"31-60": 0.25})},
             )
             assert calc_resp.status_code == 200
             assert calc_resp.json()["policy_used"]["31-60"] == 0.25

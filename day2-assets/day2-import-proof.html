@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sah.Bukti Day 2 - Import Proof</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #111827;
+      --panel-2: #0f172a;
+      --border: rgba(255,255,255,0.10);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --green: #22c55e;
+      --amber: #d4a853;
+      --pink: #f472b6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(244,114,182,0.12), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(212,168,83,0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: Consolas, "SFMono-Regular", Menlo, Monaco, monospace;
+    }
+    .frame {
+      width: 1600px;
+      height: 900px;
+      padding: 48px;
+    }
+    .eyebrow {
+      color: var(--amber);
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 54px;
+      line-height: 1.05;
+      font-weight: 700;
+    }
+    .sub {
+      color: var(--muted);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 24px;
+      line-height: 1.45;
+      max-width: 1120px;
+      margin-bottom: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(17,24,39,0.94), rgba(15,23,42,0.96));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+    }
+    .terminal-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 999px; }
+    .red { background: #ef4444; }
+    .yellow { background: #f59e0b; }
+    .green { background: #22c55e; }
+    .terminal-title {
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    pre {
+      margin: 0;
+      padding: 24px 28px 28px;
+      font-size: 23px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .side {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .side-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.02);
+    }
+    .label {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .value {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 30px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+    .value.small {
+      font-size: 22px;
+      line-height: 1.35;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .accent { color: var(--green); }
+    .accent-2 { color: var(--pink); }
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="eyebrow">Day 2 Proof</div>
+    <h1>Imports stay as evidence until someone approves</h1>
+    <div class="sub">WhatsApp exports and CSV handoff fit the same control loop: import, review, approve, then accounting state changes.</div>
+    <div class="grid">
+      <div class="card">
+        <div class="terminal-top">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">demo_evidence_import.py</span>
+        </div>
+        <pre>1. Seed invoice created: INV-IMPORT-001
+2. WhatsApp export import: {"business_id": 2, "source_type": "whatsapp_export", "imported_count": 1, "payment_proofs_created": 1, "invoices_created": 0, "needs_review_count": 1, "failed_count": 0, "failures": []}
+3. Invoice still pending after import: pending
+4. Approved imported proof: 1
+5. CSV import: {"business_id": 2, "source_type": "csv_export", "imported_count": 1, "payment_proofs_created": 1, "invoices_created": 0, "needs_review_count": 1, "failed_count": 0, "failures": []}
+6. Month-end readiness: {"status": "needs_attention", "score": 84, "pending_proof_count": 1}
+7. Accountant export summary: {"invoice_count": 1, "paid_total": 45.0, "proof_needs_review_count": 1}</pre>
+      </div>
+      <div class="side card">
+        <div class="side-card">
+          <div class="label">Sources</div>
+          <div class="value small">WhatsApp export · CSV handoff</div>
+        </div>
+        <div class="side-card">
+          <div class="label">Core rule</div>
+          <div class="value accent">Imports do not record payments</div>
+        </div>
+        <div class="side-card">
+          <div class="label">Month-end effect</div>
+          <div class="value accent-2">Readiness stays lower while proof is still pending review</div>
+        </div>
+        <div class="footer">evidence import demo proof</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

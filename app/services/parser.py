@@ -15,9 +15,32 @@ PAYMENT_METHOD_PATTERNS = {
     "qr": re.compile(r"\bqr\b|\bduitnow\b", re.IGNORECASE),
     "transfer": re.compile(r"\btransfer\b|\bbank\b", re.IGNORECASE),
 }
+DEMO_MENU = {
+    "nasi lemak": 5.00,
+    "nasi goreng": 7.00,
+    "roti canai": 3.50,
+    "teh tarik": 2.00,
+    "mee rebus": 6.00,
+}
+NUMBER_WORDS = {
+    "satu": 1.0,
+    "dua": 2.0,
+    "tiga": 3.0,
+    "empat": 4.0,
+    "lima": 5.0,
+    "enam": 6.0,
+    "tujuh": 7.0,
+    "lapan": 8.0,
+    "sembilan": 9.0,
+    "sepuluh": 10.0,
+}
 
 
-def parse_order(text: str, business_id: int = 1) -> dict:
+def parse_order(text: str, business_id: int) -> dict:
+    regex_first = _parse_with_regex(text, business_id)
+    if regex_first["total"] > 0 and regex_first.get("menu_matched"):
+        return regex_first
+
     ai_error: Exception | None = None
     if GEMINI_API_KEY:
         try:
@@ -25,7 +48,7 @@ def parse_order(text: str, business_id: int = 1) -> dict:
         except Exception as exc:
             ai_error = exc
 
-    parsed = _parse_with_regex(text, business_id)
+    parsed = regex_first
     if ai_error is not None:
         parsed["source"] = "regex_fallback"
     return parsed
@@ -66,16 +89,18 @@ def _parse_with_gemini(text: str) -> dict:
 
 def _parse_with_regex(text: str, business_id: int) -> dict:
     amount_match = AMOUNT_PATTERN.search(text)
-    total = float(amount_match.group(1)) if amount_match else 0.0
+    items = _extract_items(text, float(amount_match.group(1)) if amount_match else 0.0)
+    inferred_total = round(sum(float(item["quantity"]) * float(item["unit_price"]) for item in items), 2)
+    total = float(amount_match.group(1)) if amount_match else inferred_total
     payment_method = _infer_payment_method(text)
     customer_name = _match_customer_name(text, business_id)
-    items = _extract_items(text, total)
     return {
         "customer_name": customer_name,
         "items": items,
         "total": total,
         "payment_method": payment_method,
         "source": "regex",
+        "menu_matched": any(float(item.get("unit_price") or 0.0) > 0 for item in items),
     }
 
 
@@ -125,10 +150,19 @@ def _match_customer_name(text: str, business_id: int) -> str | None:
 
 def _extract_items(text: str, total: float) -> list[dict]:
     normalized = " ".join(text.strip().split())
+    menu_match = _extract_menu_item(normalized)
+    if menu_match is not None:
+        item_name, quantity, unit_price = menu_match
+        if total > 0 and quantity > 0:
+            unit_price = round(total / quantity, 2)
+        return [{"name": item_name, "quantity": quantity, "unit_price": unit_price}]
+
     qty_match = QUANTITY_TOKEN_PATTERN.search(normalized)
     quantity = 1.0
     if qty_match:
         quantity = float(qty_match.group(1) or qty_match.group(2))
+    else:
+        quantity = _extract_word_quantity(normalized)
 
     item_name = "Item"
     if normalized:
@@ -144,3 +178,43 @@ def _derive_item_name(text: str) -> str:
     trimmed = re.sub(r"[^a-zA-Z0-9\s\-]", " ", trimmed)
     trimmed = " ".join(trimmed.split()).strip()
     return trimmed or "Item"
+
+
+def _extract_menu_item(text: str) -> tuple[str, float, float] | None:
+    lowered = text.lower()
+    for menu_name, unit_price in DEMO_MENU.items():
+        if menu_name in lowered:
+            quantity = _extract_quantity_near_phrase(lowered, menu_name)
+            return menu_name.title(), quantity, unit_price
+    return None
+
+
+def _extract_quantity_near_phrase(text: str, phrase: str) -> float:
+    pattern_x_before = re.search(rf"x\s*(\d+(?:\.\d+)?)\s+{re.escape(phrase)}", text, re.IGNORECASE)
+    if pattern_x_before:
+        return float(pattern_x_before.group(1))
+    pattern_before = re.search(rf"(\d+(?:\.\d+)?)\s+{re.escape(phrase)}", text, re.IGNORECASE)
+    if pattern_before:
+        return float(pattern_before.group(1))
+    pattern_x_after = re.search(rf"{re.escape(phrase)}\s+x\s*(\d+(?:\.\d+)?)", text, re.IGNORECASE)
+    if pattern_x_after:
+        return float(pattern_x_after.group(1))
+    pattern_after = re.search(rf"{re.escape(phrase)}\s+(\d+(?:\.\d+)?)", text, re.IGNORECASE)
+    if pattern_after:
+        return float(pattern_after.group(1))
+    for word, value in NUMBER_WORDS.items():
+        if re.search(rf"\b{re.escape(word)}\b\s+{re.escape(phrase)}", text, re.IGNORECASE):
+            return value
+        if re.search(rf"{re.escape(phrase)}\s+\b{re.escape(word)}\b", text, re.IGNORECASE):
+            return value
+    return _extract_word_quantity(text)
+
+
+def _extract_word_quantity(text: str) -> float:
+    for word, value in NUMBER_WORDS.items():
+        if re.search(rf"\b{re.escape(word)}\b", text, re.IGNORECASE):
+            return value
+    trailing_number = re.search(r"(\d+(?:\.\d+)?)\s*$", text)
+    if trailing_number:
+        return float(trailing_number.group(1))
+    return 1.0

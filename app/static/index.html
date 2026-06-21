@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KedaiOps - Malaysia-First SME Operations & Receipt Checker</title>
+    <title>Sah.Bukti - Malaysia-First SME Operations & Receipt Checker</title>
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -573,11 +573,11 @@
         <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon">KO</div>
-                <span>KedaiOps</span>
+                <span>Sah.Bukti</span>
             </div>
             <div class="status-badge">
                 <span class="status-indicator"></span>
-                <span>ResitJap Live API</span>
+                <span>Sah.Bukti Live API</span>
             </div>
         </div>
     </header>
@@ -586,10 +586,10 @@
         <!-- Left Sidebar: Actions & Inputs -->
         <section class="sidebar">
             
-            <!-- ResitJap Upload Card -->
+            <!-- Sah.Bukti Upload Card -->
             <div class="card">
                 <div class="card-title">
-                    <span>ResitJap Receipt Check</span>
+                    <span>Sah.Bukti Receipt Check</span>
                     <span class="badge badge-paid">DuitNow 0% Fee</span>
                 </div>
                 <div class="drop-zone" id="dropZone">
@@ -707,7 +707,7 @@
             <!-- Tab: Receipts -->
             <div id="tab-receipts" class="tab-content">
                 <div class="section-title">
-                    <span>ResitJap Verification Audits</span>
+                    <span>Sah.Bukti Verification Audits</span>
                 </div>
                 <div class="data-table-container">
                     <table>
@@ -850,17 +850,19 @@
         });
 
         // API calls and UI renders
-        async function handleReceiptUpload(file) {
-            const progress = document.getElementById('uploadProgress');
-            const resultDiv = document.getElementById('uploadResult');
-            progress.style.display = 'block';
-            resultDiv.style.display = 'none';
+const API_BASE = 'http://68.183.181.237:8000';
 
-            const formData = new FormData();
-            formData.append('file', file);
+async function handleReceiptUpload(file) {
+    const progress = document.getElementById('uploadProgress');
+    const resultDiv = document.getElementById('uploadResult');
+    progress.style.display = 'block';
+    resultDiv.style.display = 'none';
 
-            try {
-                const response = await fetch('/api/receipts/verify', {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch(API_BASE + '/api/receipts/verify', {
                     method: 'POST',
                     body: formData
                 });
@@ -973,7 +975,7 @@
             resDiv.style.display = 'none';
 
             try {
-                const response = await fetch('/api/ingest/whatsapp', {
+                const response = await fetch(API_BASE + '/api/ingest/whatsapp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ raw_text: rawText })
@@ -1021,7 +1023,7 @@
             };
 
             try {
-                const response = await fetch('/api/customers', {
+                const response = await fetch(API_BASE + '/api/customers', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1054,7 +1056,7 @@
             };
 
             try {
-                const response = await fetch('/api/invoices', {
+                const response = await fetch(API_BASE + '/api/invoices', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1080,7 +1082,7 @@
 
         async function loadDashboard() {
             try {
-                const resp = await fetch('/api/dashboard');
+                const resp = await fetch(API_BASE + '/api/dashboard');
                 const data = await resp.json();
                 document.getElementById('statTotalInvoices').textContent = data.total_invoices;
                 document.getElementById('statPaidAmount').textContent = `RM${data.paid_amount.toFixed(2)}`;
@@ -1092,7 +1094,7 @@
 
         async function loadInvoices() {
             try {
-                const resp = await fetch('/api/invoices');
+                const resp = await fetch(API_BASE + '/api/invoices');
                 const invoices = await resp.json();
                 const tbody = document.getElementById('invoiceTableBody');
                 tbody.innerHTML = '';
@@ -1132,7 +1134,7 @@
 
         async function loadReceiptsHistory() {
             try {
-                const resp = await fetch('/api/receipts');
+                const resp = await fetch(API_BASE + '/api/receipts');
                 const receipts = await resp.json();
                 const tbody = document.getElementById('receiptsTableBody');
                 tbody.innerHTML = '';
@@ -1168,7 +1170,7 @@
 
         async function loadCustomers() {
             try {
-                const resp = await fetch('/api/customers');
+                const resp = await fetch(API_BASE + '/api/customers');
                 const customers = await resp.json();
                 const tbody = document.getElementById('customerTableBody');
                 tbody.innerHTML = '';
@@ -1196,7 +1198,7 @@
 
         async function loadCustomerSelectOptions() {
             try {
-                const resp = await fetch('/api/customers');
+                const resp = await fetch(API_BASE + '/api/customers');
                 const customers = await resp.json();
                 const select = document.getElementById('invCustomer');
                 select.innerHTML = '<option value="">-- Select Customer --</option>';
@@ -1228,7 +1230,7 @@
             // Poll for receipt verification history updates every 4 seconds to simulate Soundbox
             setInterval(async () => {
                 try {
-                    const resp = await fetch('/api/receipts');
+                    const resp = await fetch(API_BASE + '/api/receipts');
                     if (!resp.ok) return;
                     const receipts = await resp.json();
                     
@@ -1268,3 +1270,4 @@
     </script>
 </body>
 </html>
+

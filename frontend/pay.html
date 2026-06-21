@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sah.Bukti Payment</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f1e8;
+      --card: #fffaf2;
+      --ink: #1f1a17;
+      --muted: #6a5d52;
+      --accent: #b56c2a;
+      --line: #e7d7c3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top, #fce7c7 0, rgba(252, 231, 199, 0) 45%),
+        linear-gradient(180deg, var(--bg), #efe5d8);
+      color: var(--ink);
+      font: 16px/1.5 Georgia, "Times New Roman", serif;
+    }
+    main {
+      width: min(100%, 640px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(64, 37, 17, 0.08);
+    }
+    h1 { margin: 0 0 12px; font-size: 2rem; }
+    p { margin: 0 0 12px; }
+    .muted { color: var(--muted); }
+    .pill {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f3dfc7;
+      color: #7f4a1b;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .panel {
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #f7efe4;
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="pill">Demo payment page</div>
+    <h1>Sah.Bukti Payment</h1>
+    <p>This route is kept for local demos and mock payment links.</p>
+    <p class="muted">Trust boundary: opening this page does not mark an invoice as paid. Real status changes only after owner approval of payment proof.</p>
+    <div class="panel">
+      <p><strong>Invoice id:</strong> <code id="invoiceId">unknown</code></p>
+      <p class="muted">If you reached this from a mock payment link, share the invoice reference back into Sah.Bukti as payment evidence for review.</p>
+    </div>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const invoiceId = params.get("id");
+    if (invoiceId) {
+      document.getElementById("invoiceId").textContent = invoiceId;
+    }
+  </script>
+</body>
+</html>

@@ -24,5 +24,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local backups / temp
+frontend-backup-*/
+test-results/
+tmp/
+
 # Migrations (optional: remove if you want them tracked)
 # migrations/

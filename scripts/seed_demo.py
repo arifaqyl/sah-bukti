@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seed realistic demo data for Kede."""
+"""Seed realistic demo data for Sah.Bukti."""
 from __future__ import annotations
 
 import json
@@ -21,6 +21,7 @@ BAKERY_ITEMS = {
     "teh_tarik": {"name": "Teh Tarik", "unit_price": 2.50},
     "kuih_muih": {"name": "Kuih-Muih", "unit_price": 3.00},
 }
+DEMO_OWNER_PHONE = "60123456789"
 
 MALAYSIAN_METHODS = ["cash", "qr", "transfer"]
 
@@ -34,24 +35,75 @@ INVOICE_NUMBERS = [
 
 def ensure_business(conn):
     row = conn.execute("SELECT id FROM businesses ORDER BY id ASC LIMIT 1").fetchone()
+    now = datetime.now(timezone.utc).isoformat()
     if row is None:
-        now = datetime.now(timezone.utc).isoformat()
         conn.execute(
             """
-            INSERT INTO businesses (name, owner_whatsapp, industry, provision_policy, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO businesses (name, owner_whatsapp, industry, tagline, theme_color, provision_policy, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "Kede Demo",
-                "60123456789",
+                "Sah.Bukti Demo",
+                DEMO_OWNER_PHONE,
                 "baker",
+                "reviewable evidence for Malaysian micro-sellers",
+                "#D4A853",
                 json.dumps({"current": 0.0, "31-60": 0.05, "61-90": 0.10, "91-180": 0.20, "180+": 1.0}),
                 now,
                 now,
             ),
         )
         return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
-    return row["id"]
+    business_id = row["id"]
+    conn.execute(
+        """
+        UPDATE businesses
+        SET owner_whatsapp = ?, tagline = ?, theme_color = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (
+            DEMO_OWNER_PHONE,
+            "reviewable evidence for Malaysian micro-sellers",
+            "#D4A853",
+            now,
+            business_id,
+        ),
+    )
+    return business_id
+
+
+def ensure_demo_owner(conn, business_id: int) -> int:
+    row = conn.execute(
+        """
+        SELECT u.id
+        FROM business_memberships bm
+        JOIN users u ON u.id = bm.user_id
+        WHERE bm.business_id = ?
+        ORDER BY CASE WHEN bm.role = 'owner' THEN 0 ELSE 1 END, bm.id ASC
+        LIMIT 1
+        """,
+        (business_id,),
+    ).fetchone()
+    if row:
+        return int(row["id"])
+
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute(
+        """
+        INSERT INTO users (email, password_hash, display_name, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        ("demo@sahbukti.local", "seeded-demo-account", "Sah.Bukti Demo Owner", now, now),
+    )
+    user_id = int(conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"])
+    conn.execute(
+        """
+        INSERT INTO business_memberships (user_id, business_id, role, created_at)
+        VALUES (?, ?, ?, ?)
+        """,
+        (user_id, business_id, "owner", now),
+    )
+    return user_id
 
 
 def iso(dt: datetime) -> str:
@@ -60,18 +112,20 @@ def iso(dt: datetime) -> str:
 
 def add_customer(conn, business_id: int, name: str, phone: str | None = None) -> int:
     now = iso(datetime.now(timezone.utc))
+    existing = conn.execute(
+        "SELECT id FROM customers WHERE business_id = ? AND name = ?",
+        (business_id, name),
+    ).fetchone()
+    if existing:
+        return existing["id"]
     conn.execute(
         """
-        INSERT OR IGNORE INTO customers (business_id, name, phone, email, created_at)
+        INSERT INTO customers (business_id, name, phone, email, created_at)
         VALUES (?, ?, ?, ?, ?)
         """,
         (business_id, name, phone, f"{name.lower().replace(' ', '.')}@demo.local", now),
     )
-    row = conn.execute(
-        "SELECT id FROM customers WHERE business_id = ? AND name = ?",
-        (business_id, name),
-    ).fetchone()
-    return row["id"]
+    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
 
 
 def add_invoice(
@@ -146,14 +200,15 @@ def add_ingredient(
     current_stock: float,
     reorder_point: float,
     supplier: str | None = None,
+    notes: str | None = None,
 ):
     now = iso(datetime.now(timezone.utc))
     conn.execute(
         """
-        INSERT OR REPLACE INTO ingredients (business_id, name, unit, current_stock, reorder_point, supplier, last_updated)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO ingredients (business_id, name, unit, current_stock, reorder_point, supplier, notes, last_updated)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (business_id, name, unit, current_stock, reorder_point, supplier, now),
+        (business_id, name, unit, current_stock, reorder_point, supplier, notes, now),
     )
 
 
@@ -182,17 +237,60 @@ def make_items(*keys, base_qty=1):
     return items
 
 
+def add_proof(
+    conn,
+    business_id: int,
+    uploaded_by_user_id: int | None,
+    invoice_number: str,
+    amount: float,
+    reference: str,
+    source: str = "whatsapp",
+    state: str = "needs_review",
+):
+    inv = conn.execute("SELECT id FROM invoices WHERE invoice_number = ?", (invoice_number,)).fetchone()
+    inv_id = inv["id"] if inv else None
+    now = iso(datetime.now(timezone.utc))
+    conn.execute(
+        """
+        INSERT INTO payment_proofs (business_id, invoice_id, uploaded_by_user_id, source_channel, file_path, file_hash, mime_type, file_size_bytes, extracted_amount, extracted_reference, review_state, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (business_id, inv_id, uploaded_by_user_id, source, "/demo/proof", f"hash-{reference}", "text/plain", 0, amount, reference, state, now),
+    )
+
+
 def main() -> int:
     if not DB_PATH.exists():
         raise SystemExit(f"DB not found at {DB_PATH}. Run the app once to init the database.")
 
     with get_db() as conn:
+        # Deduplicate customers first
+        conn.execute("""
+            DELETE FROM customers WHERE id NOT IN (
+                SELECT MIN(id) FROM customers GROUP BY business_id, name
+            )
+        """)
+        
         business_id = ensure_business(conn)
+        demo_owner_user_id = ensure_demo_owner(conn, business_id)
 
         # Idempotent cleanup: only remove records seeded by this script
         for num in INVOICE_NUMBERS:
             inv = conn.execute("SELECT id FROM invoices WHERE invoice_number = ?", (num,)).fetchone()
             if inv:
+                proof_rows = conn.execute(
+                    "SELECT id FROM payment_proofs WHERE invoice_id = ?",
+                    (inv["id"],),
+                ).fetchall()
+                for proof_row in proof_rows:
+                    proof_id = int(proof_row["id"])
+                    conn.execute("DELETE FROM payment_proof_events WHERE payment_proof_id = ?", (proof_id,))
+                    conn.execute("DELETE FROM receipts WHERE proof_id = ?", (proof_id,))
+                    conn.execute("DELETE FROM provider_callback_events WHERE proof_id = ?", (proof_id,))
+                conn.execute("DELETE FROM payment_proofs WHERE invoice_id = ?", (inv["id"],))
+                conn.execute("DELETE FROM receipts WHERE invoice_id = ?", (inv["id"],))
+                conn.execute("DELETE FROM provider_callback_events WHERE processed_invoice_id = ?", (inv["id"],))
+                conn.execute("DELETE FROM reminders WHERE invoice_id = ?", (inv["id"],))
                 conn.execute("DELETE FROM payments WHERE invoice_id = ?", (inv["id"],))
                 conn.execute("DELETE FROM invoices WHERE id = ?", (inv["id"],))
         conn.execute("DELETE FROM daily_ops WHERE date NOT IN (SELECT date FROM daily_ops) OR business_id = ?", (business_id,))
@@ -261,10 +359,10 @@ def main() -> int:
         )
 
         # Ingredients with realistic Malaysian bakery stock levels
-        add_ingredient(conn, business_id, "Flour", "kg", 8.0, 10.0, "Sime Darby")
-        add_ingredient(conn, business_id, "Sugar", "kg", 3.0, 10.0, "Malayan Sugar")
-        add_ingredient(conn, business_id, "Butter", "kg", 12.0, 5.0, "Lamsoon")
-        add_ingredient(conn, business_id, "Eggs", "pcs", 80.0, 100.0, "Farm Fresh")
+        add_ingredient(conn, business_id, "Flour", "kg", 8.0, 10.0, "Sime Darby", "Call Sime Darby every Friday")
+        add_ingredient(conn, business_id, "Sugar", "kg", 3.0, 10.0, "Malayan Sugar", "Low stock before weekend bulk orders")
+        add_ingredient(conn, business_id, "Butter", "kg", 12.0, 5.0, "Lamsoon", "Keep chilled on delivery")
+        add_ingredient(conn, business_id, "Eggs", "pcs", 80.0, 100.0, "Farm Fresh", "Confirm next-morning delivery slots")
 
         # 30 days of daily_ops (weekends higher)
         for i in range(30):
@@ -277,6 +375,10 @@ def main() -> int:
                 orders = 20 + (i % 5) * 2
                 revenue = orders * 5.80
             add_daily_ops(conn, business_id, datetime.combine(ops_date, datetime.min.time()), orders, revenue)
+
+        # Demo payment proofs for Review queue (show in frontend)
+        add_proof(conn, business_id, demo_owner_user_id, "INV-CUR1", 45.0, "TXN-DEMO-001")
+        add_proof(conn, business_id, demo_owner_user_id, "INV-CUR2", 62.5, "TXN-DEMO-002")
 
         conn.commit()
 

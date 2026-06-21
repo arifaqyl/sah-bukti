@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sah.Bukti - Provision Report</title>
+  <style>
+    :root {
+      --bg: #0f0f14;
+      --surface: #181820;
+      --surface-2: #1e1e2a;
+      --border: #2a2a32;
+      --text: #f5f0e8;
+      --text-2: #a09b8f;
+      --text-3: #6b665c;
+      --accent: #d4a853;
+      --accent-2: #e6bc6a;
+      --success: #4ade80;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --info: #60a5fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "JetBrains Mono", "Courier New", monospace;
+      background: radial-gradient(circle at top right, rgba(212, 168, 83, 0.12), transparent 30%), var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      color: var(--accent);
+      font-size: 2rem;
+      border-bottom: 2px solid rgba(212, 168, 83, 0.35);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+
+    p, label, td, th, button, input {
+      font-size: 0.95rem;
+    }
+
+    .meta {
+      color: var(--text-2);
+    }
+
+    .muted {
+      color: var(--text-3);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 14px 0;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 12px;
+    }
+
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: var(--text-2);
+    }
+
+    input[type="month"] {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    button {
+      background: var(--accent);
+      color: var(--bg);
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-2);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    @media (min-width: 820px) {
+      .hero-grid {
+        grid-template-columns: 2.2fr 1fr 1fr 1fr;
+      }
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .metric-label {
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.74rem;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .metric-sub {
+      margin-top: 8px;
+      color: var(--text-2);
+      font-size: 0.85rem;
+    }
+
+    .metric-value.success {
+      color: var(--success);
+    }
+
+    .metric-value.warning {
+      color: var(--warning);
+    }
+
+    .metric-value.danger {
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.72rem;
+    }
+
+    td.num, th.num {
+      text-align: right;
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    .success {
+      color: var(--success);
+    }
+
+    .warning {
+      color: var(--warning);
+    }
+
+    .info {
+      color: var(--info);
+    }
+
+    .journal-entry {
+      background: var(--surface-2);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin-top: 12px;
+      border-radius: 8px;
+    }
+
+    .journal-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .journal-row:last-child {
+      border-bottom: 0;
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 8px;
+      color: var(--text-2);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 44px 20px;
+      color: var(--text-3);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Sah.Bukti Provision Report</h1>
+
+    <div class="card">
+      <div class="controls">
+        <label>
+          <span>Month</span>
+          <input type="month" id="month">
+        </label>
+        <button id="generate-button" type="button">Generate Report</button>
+        <button id="csv-button" type="button" disabled>Export CSV</button>
+        <button id="json-button" type="button" disabled>Export JSON</button>
+      </div>
+      <div class="status" id="status">Waiting for report request.</div>
+    </div>
+
+    <div id="result">
+      <div class="card empty-state">Loading report shell...</div>
+    </div>
+  </div>
+
+  <script>
+    var activeMonth = '';
+    var latestCalculation = null;
+
+    function currentMonth() {
+      return new Date().toISOString().slice(0, 7);
+    }
+
+    function currency(value) {
+      return 'RM ' + Number(value || 0).toFixed(2);
+    }
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, function (char) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[char];
+      });
+    }
+
+    function setStatus(message, tone) {
+      var el = document.getElementById('status');
+      el.textContent = message;
+      el.className = 'status';
+      if (tone) {
+        el.className += ' ' + tone;
+      }
+    }
+
+    function setExportState(enabled) {
+      document.getElementById('csv-button').disabled = !enabled;
+      document.getElementById('json-button').disabled = !enabled;
+    }
+
+    function extractRiskiestInvoices(invoices, month) {
+      var monthEnd = new Date(month + '-28T00:00:00');
+      monthEnd = new Date(monthEnd.getFullYear(), monthEnd.getMonth() + 1, 0);
+      return invoices
+        .filter(function (invoice) {
+          return invoice.payment_status !== 'paid';
+        })
+        .map(function (invoice) {
+          var due = invoice.due_date ? new Date(String(invoice.due_date).slice(0, 10) + 'T00:00:00') : monthEnd;
+          var overdue = Math.max(0, Math.floor((monthEnd - due) / 86400000));
+          return {
+            invoice_number: invoice.invoice_number,
+            customer_name: invoice.customer_name || 'Walk-in',
+            total: Number(invoice.total || 0),
+            due_date: invoice.due_date ? String(invoice.due_date).slice(0, 10) : '--',
+            days_overdue: overdue
+          };
+        })
+        .sort(function (a, b) {
+          if (b.days_overdue !== a.days_overdue) {
+            return b.days_overdue - a.days_overdue;
+          }
+          return b.total - a.total;
+        })
+        .slice(0, 5);
+    }
+
+    function renderReport(month, calc, riskyInvoices) {
+      var overdueCount = calc.breakdown
+        .filter(function (bucket) { return bucket.bucket !== 'current'; })
+        .reduce(function (sum, bucket) { return sum + (bucket.count || 0); }, 0);
+      var oldestDebt = riskyInvoices.length ? riskyInvoices[0].days_overdue : 0;
+      var largestExposure = riskyInvoices.reduce(function (max, row) {
+        return Math.max(max, row.total);
+      }, 0);
+
+      var html = '';
+      html += '<div class="hero-grid">';
+      html += '<div class="metric"><div class="metric-label">Provision required</div><div class="metric-value">' + currency(calc.provision_amount) + '</div><div class="metric-sub">' + escapeHtml(month) + ' | ' + calc.breakdown.reduce(function (sum, bucket) { return sum + (bucket.count || 0); }, 0) + ' outstanding invoices</div></div>';
+      html += '<div class="metric"><div class="metric-label">Outstanding</div><div class="metric-value warning">' + currency(calc.total_outstanding) + '</div><div class="metric-sub">Receivables still open</div></div>';
+      html += '<div class="metric"><div class="metric-label">Overdue invoices</div><div class="metric-value danger">' + overdueCount + '</div><div class="metric-sub">Beyond current bucket</div></div>';
+      html += '<div class="metric"><div class="metric-label">Oldest debt</div><div class="metric-value success">' + oldestDebt + 'd</div><div class="metric-sub">Largest exposure ' + currency(largestExposure) + '</div></div>';
+      html += '</div>';
+
+      html += '<div class="card"><h2>Aging Breakdown</h2><table><thead><tr><th>Bucket</th><th class="num">Count</th><th class="num">Amount</th><th class="num">Rate</th><th class="num">Provision</th></tr></thead><tbody>';
+      calc.breakdown.forEach(function (bucket) {
+        html += '<tr>' +
+          '<td>' + escapeHtml(bucket.label || bucket.bucket) + '</td>' +
+          '<td class="num">' + (bucket.count || 0) + '</td>' +
+          '<td class="num">' + currency(bucket.amount) + '</td>' +
+          '<td class="num">' + (Number(bucket.rate || 0) * 100).toFixed(0) + '%</td>' +
+          '<td class="num danger">' + currency(bucket.provision) + '</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      html += '<div class="card"><h2>Top Risky Invoices</h2>';
+      if (riskyInvoices.length === 0) {
+        html += '<div class="empty-state">No unpaid invoices found for this month.</div>';
+      } else {
+        html += '<table><thead><tr><th>Invoice</th><th>Customer</th><th class="num">Days Overdue</th><th class="num">Amount</th><th>Due Date</th></tr></thead><tbody>';
+        riskyInvoices.forEach(function (row) {
+          html += '<tr>' +
+            '<td>' + escapeHtml(row.invoice_number) + '</td>' +
+            '<td>' + escapeHtml(row.customer_name) + '</td>' +
+            '<td class="num">' + row.days_overdue + '</td>' +
+            '<td class="num">' + currency(row.total) + '</td>' +
+            '<td>' + escapeHtml(row.due_date) + '</td>' +
+          '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+      html += '</div>';
+
+      html += '<div class="card"><h2>Journal Entry</h2><div class="journal-entry">';
+      (calc.journal_entry.entries || []).forEach(function (entry) {
+        var amount = entry.debit > 0 ? entry.debit : entry.credit;
+        var prefix = entry.debit > 0 ? 'Dr ' : 'Cr ';
+        var tone = entry.debit > 0 ? 'danger' : 'success';
+        html += '<div class="journal-row"><span>' + prefix + escapeHtml(entry.account) + '</span><span class="' + tone + '">' + currency(amount) + '</span></div>';
+      });
+      html += '</div><p class="success" style="margin-top:12px;">Balanced journal entry</p></div>';
+
+      html += '<div class="card"><h2>Justification</h2><p class="meta">' + escapeHtml(calc.justification || 'No justification available.') + '</p></div>';
+      return html;
+    }
+
+    async function fetchJson(url) {
+      var response = await fetch(url);
+      var body = await response.json();
+      if (!response.ok) {
+        throw new Error((body.error && body.error.message) || ('HTTP ' + response.status));
+      }
+      return body;
+    }
+
+    async function loadReport() {
+      activeMonth = document.getElementById('month').value;
+      if (!activeMonth) {
+        setStatus('Choose a month first.', 'warning');
+        return;
+      }
+
+      setExportState(false);
+      latestCalculation = null;
+      setStatus('Generating report for ' + activeMonth + '...', 'info');
+      document.getElementById('result').innerHTML = '<div class="card empty-state">Loading report...</div>';
+
+      try {
+        var results = await Promise.all([
+          fetchJson('/api/v1/provision/calculate?business_id=1&month=' + encodeURIComponent(activeMonth)),
+          fetchJson('/api/v1/invoices')
+        ]);
+        latestCalculation = results[0];
+        var riskyInvoices = extractRiskiestInvoices(results[1], activeMonth);
+        document.getElementById('result').innerHTML = renderReport(activeMonth, latestCalculation, riskyInvoices);
+        setExportState(true);
+        setStatus('Report ready. Export CSV or JSON for the accountant.', 'success');
+      } catch (error) {
+        document.getElementById('result').innerHTML = '<div class="card empty-state">No provision data available. ' + escapeHtml(error.message) + '</div>';
+        setStatus('Report unavailable: ' + error.message, 'danger');
+      }
+    }
+
+    async function exportCSV() {
+      if (!activeMonth) {
+        return;
+      }
+      setStatus('Preparing CSV export...', 'info');
+      try {
+        var response = await fetch('/api/v1/provision/export?business_id=1&month=' + encodeURIComponent(activeMonth) + '&format=csv');
+        if (!response.ok) {
+          throw new Error('CSV export failed');
+        }
+        var blob = await response.blob();
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'provision-' + activeMonth + '.csv';
+        link.click();
+        setStatus('CSV downloaded for ' + activeMonth + '.', 'success');
+      } catch (error) {
+        setStatus(error.message, 'danger');
+      }
+    }
+
+    async function exportJSON() {
+      if (!activeMonth) {
+        return;
+      }
+      setStatus('Preparing JSON export...', 'info');
+      try {
+        var response = await fetch('/api/v1/provision/export?business_id=1&month=' + encodeURIComponent(activeMonth) + '&format=json');
+        if (!response.ok) {
+          throw new Error('JSON export failed');
+        }
+        var blob = await response.blob();
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'provision-' + activeMonth + '.json';
+        link.click();
+        setStatus('JSON downloaded for ' + activeMonth + '.', 'success');
+      } catch (error) {
+        setStatus(error.message, 'danger');
+      }
+    }
+
+    document.getElementById('generate-button').addEventListener('click', loadReport);
+    document.getElementById('csv-button').addEventListener('click', exportCSV);
+    document.getElementById('json-button').addEventListener('click', exportJSON);
+    document.getElementById('month').value = currentMonth();
+    loadReport();
+  </script>
+</body>
+</html>

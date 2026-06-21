@@ -123,7 +123,7 @@ class ProvisionEngine:
         justification = (
             f"Based on {invoice_count} outstanding invoices across {active_buckets} age buckets. "
             f"Total outstanding: RM{total_outstanding:,.2f}. Historical write-off rate: {historical_rate:.1f}%. "
-            "Provision calculated using standard MFRS 139 approach."
+            "Provision calculated using standard MFRS 9 expected credit loss approach."
         )
         result: ProvisionResult = {
             "month": month,

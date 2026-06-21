@@ -1,19 +1,20 @@
-from fastapi import APIRouter, File, UploadFile
-import uuid
+from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.schemas.receipt import ReceiptResponse, ReceiptVerificationDetail
-from app.services.receipts import list_verifications, verify_receipt_image
+from app.services.receipts import list_verifications
 
 router = APIRouter()
 
 
 @router.post("/verify")
-async def verify_receipt(file: UploadFile = File(...), invoice_id: int | None = None) -> dict:
-    file_bytes = await file.read()
-    # Generate a unique filename to avoid collision
-    unique_filename = f"{uuid.uuid4()}_{file.filename}"
-    result = verify_receipt_image(file_bytes, unique_filename, invoice_id)
-    return result
+async def verify_receipt(
+    file: UploadFile = File(...),  # noqa: ARG001
+    invoice_id: int | None = None,  # noqa: ARG001
+) -> dict:
+    raise HTTPException(
+        status_code=410,
+        detail="Deprecated receipt route. Use payment proofs so owner approval remains the only ledger mutation path.",
+    )
 
 
 @router.get("", response_model=list[ReceiptVerificationDetail])

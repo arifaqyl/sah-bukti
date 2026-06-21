@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from app.db.store import get_db, get_default_business_id, utc_now
+from app.db.store import get_db, utc_now
 from app.services.inventory import get_reorder_alerts
 from app.services.provision import ProvisionEngine
 
@@ -199,7 +199,9 @@ def _upsert_daily_close(summary: dict) -> dict:
 
 
 def run_daily_close(business_id: int | None = None, close_date: str | None = None) -> dict:
-    resolved_business_id = int(business_id or get_default_business_id())
+    if business_id is None:
+        raise ValueError("business_id is required")
+    resolved_business_id = int(business_id)
     resolved_date = resolve_daily_close_date(close_date)
     logger.info("Running daily close for business=%s date=%s", resolved_business_id, resolved_date)
     summary = _build_daily_close_totals(resolved_business_id, resolved_date)
@@ -225,7 +227,9 @@ def run_daily_close(business_id: int | None = None, close_date: str | None = Non
 
 
 def run_monthly_provision(business_id: int | None = None, month: str | None = None) -> dict:
-    resolved_business_id = int(business_id or get_default_business_id())
+    if business_id is None:
+        raise ValueError("business_id is required")
+    resolved_business_id = int(business_id)
     resolved_month = resolve_provision_month(month)
     logger.info("Running monthly provision for business=%s month=%s", resolved_business_id, resolved_month)
     engine = ProvisionEngine()
