@@ -51,8 +51,9 @@ def ingest_whatsapp_evidence(
         invoice_num = _extract_invoice_number(normalized_text)
         invoice = get_invoice_by_number(invoice_num, business_id) if invoice_num else find_latest_open_invoice_for_phone(business_id, from_phone)
         payment_info = detect_payment(normalized_text)
-        auto_approve = bool(payment_info.amount and invoice and normalized_media_type == "receipt_image")
-
+        # Trust boundary: an inbound WhatsApp message never confirms a payment,
+        # not even a receipt image with a matching invoice. Every proof lands in
+        # needs_review and the owner must call approve_payment_proof().
         proof = _create_whatsapp_proof(
             business_id=business_id,
             text=normalized_text or _serialize_metadata(metadata, normalized_media_type),
@@ -61,7 +62,6 @@ def ingest_whatsapp_evidence(
             invoice_number=invoice_num,
             source_channel=source_channel,
             decision_reason="needs_manual_review",
-            auto_approve=auto_approve,
         )
         return {
             "business_id": business_id,
@@ -178,7 +178,6 @@ def _create_whatsapp_proof(
     invoice_number: str | None,
     source_channel: str,
     decision_reason: str | None = None,
-    auto_approve: bool = False,
 ) -> dict:
     payment_info = detect_payment(text)
     invoice = get_invoice_by_number(invoice_number, business_id) if invoice_number else None
@@ -191,29 +190,8 @@ def _create_whatsapp_proof(
     if existing:
         return existing
     
-    # Auto-approve if receipt image with valid amount + matching invoice
     extracted_amount = payment_info.amount if payment_info.amount is not None else (float(invoice["total"]) if invoice else None)
     extracted_reference = invoice_number or (invoice.get("invoice_number") if invoice else None)
-
-    if auto_approve and extracted_amount is not None and invoice:
-        proof = create_text_payment_proof(
-            business_id=business_id,
-            uploaded_by_user_id=None,
-            text=text,
-            source_channel=source_channel,
-            dedupe_key=dedupe_key,
-            invoice_id=invoice["id"],
-            extracted_amount=extracted_amount,
-            extracted_reference=extracted_reference,
-            extracted_method=payment_info.method,
-            extra_payload={
-                "media_type": media_type,
-                "media_metadata": media_metadata,
-            },
-            decision_reason="auto_approved_receipt",
-            auto_approve=True,
-        )
-        return proof
 
     return create_text_payment_proof(
         business_id=business_id,

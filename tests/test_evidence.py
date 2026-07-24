@@ -160,3 +160,89 @@ def test_evidence_whatsapp_route_scope_and_non_mutating_flow():
             assert receipt_payload["payment_proof"]["invoice_id"] is None
 
     asyncio.run(run())
+
+
+def test_evidence_receipt_image_with_matching_invoice_stays_in_review():
+    """A receipt image that matches an open invoice must NOT auto-approve.
+    The previous behaviour marked the invoice paid with no owner review, which
+    is the central trust hole: any forwarded receipt could settle a debt."""
+    async def run() -> None:
+        reset_db()
+        app = create_app()
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            token, business_id = await _signup(client, "receipt-trust@example.com", "Receipt Trust")
+            invoice = _seed_invoice(business_id, invoice_number="INV-RECEIPT-1", total=90.0)
+
+            receipt = await client.post(
+                "/api/v1/evidence/whatsapp",
+                headers=_auth_headers(token),
+                params={"business_id": business_id},
+                json={
+                    "business_id": business_id,
+                    "from_phone": "60124440000",
+                    "message": "Paid RM90 for INV-RECEIPT-1 via QR",
+                    "media_type": "receipt_image",
+                    "media_metadata": {"filename": "receipt.jpg", "mime_type": "image/jpeg"},
+                },
+            )
+            assert receipt.status_code == 200
+            payload = receipt.json()
+            assert payload["intent"] == "payment_proof"
+            proof = payload["payment_proof"]
+            assert proof["review_state"] == "needs_review"
+            assert proof["invoice_id"] == invoice["id"]
+            assert proof["approved_payment_id"] is None
+
+            unchanged = get_invoice(invoice["id"], business_id)
+            assert unchanged is not None
+            assert unchanged["payment_status"] == "pending"
+            with get_db() as conn:
+                payment_count = conn.execute(
+                    "SELECT COUNT(*) AS count FROM payments WHERE invoice_id = ?",
+                    (invoice["id"],),
+                ).fetchone()["count"]
+            assert payment_count == 0
+
+            approve = await client.post(
+                f"/api/v1/payment-proofs/{proof['id']}/approve",
+                headers=_auth_headers(token),
+                params={"business_id": business_id},
+                json={"invoice_id": invoice["id"], "amount": 90.0, "reference": "RECEIPT-APPROVED", "method": "qr"},
+            )
+            assert approve.status_code == 200
+            assert get_invoice(invoice["id"], business_id)["payment_status"] == "paid"
+
+    asyncio.run(run())
+
+
+def test_patch_invoice_cannot_set_paid_status_without_proof():
+    """PATCH must not be able to flip an invoice to a confirmed-paid state.
+    Only an approved payment proof may do that."""
+    async def run() -> None:
+        reset_db()
+        app = create_app()
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            token, business_id = await _signup(client, "patch-trust@example.com", "Patch Trust")
+            invoice = _seed_invoice(business_id, invoice_number="INV-PATCH-1", total=120.0)
+            headers = _auth_headers(token)
+
+            for forbidden in ("paid", "partial", "Paid", "PARTIAL"):
+                resp = await client.patch(
+                    f"/api/v1/invoices/{invoice['id']}",
+                    headers=headers,
+                    params={"business_id": business_id},
+                    json={"payment_status": forbidden},
+                )
+                assert resp.status_code == 400, forbidden
+                assert get_invoice(invoice["id"], business_id)["payment_status"] == "pending"
+
+            sent = await client.patch(
+                f"/api/v1/invoices/{invoice['id']}",
+                headers=headers,
+                params={"business_id": business_id},
+                json={"payment_status": "sent"},
+            )
+            assert sent.status_code == 200
+            assert sent.json()["payment_status"] == "sent"
+
+    asyncio.run(run())

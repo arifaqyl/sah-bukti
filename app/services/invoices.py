@@ -195,6 +195,16 @@ def update_invoice(invoice_id: int, payload: dict, business_id: int | None = Non
     if not updates:
         return get_invoice(invoice_id, business_id)
 
+    # Trust boundary: a confirmed-paid state can only originate from an approved
+    # payment proof (record_invoice_payment). Letting PATCH set payment_status to
+    # "paid"/"partial" would let an owner mark invoices paid with no proof on file.
+    requested_status = updates.get("payment_status")
+    if isinstance(requested_status, str) and requested_status.strip().lower() in {"paid", "partial"}:
+        raise ValueError(
+            "payment_status cannot be set to 'paid' or 'partial' directly; "
+            "approve a payment proof instead"
+        )
+
     if "customer_id" in updates and not get_customer(int(updates["customer_id"]), business_id):
         raise ValueError("Customer not found")
 
