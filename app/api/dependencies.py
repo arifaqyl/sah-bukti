@@ -1,12 +1,20 @@
 from dataclasses import dataclass
+import os
 
-from fastapi import Depends, Header, HTTPException, Query, status
+from fastapi import Depends, Header, HTTPException, Query, Request, status
 
 from app.db.store import get_db
 from app.services.auth import get_business, get_membership, get_user_by_token
 
 
 DEMO_BUSINESS_ID = 1
+_WRITE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+def _demo_write_enabled() -> bool:
+    """Demo mode is read-only by default. Anonymous visitors can browse, but
+    only SAHBUKTI_DEMO_WRITE=true allows demo=1 to mutate data."""
+    return os.getenv("SAHBUKTI_DEMO_WRITE", "false").lower() in {"1", "true", "yes", "on"}
 
 
 @dataclass(frozen=True)
@@ -57,6 +65,7 @@ async def get_business_context(
 
 
 async def get_business_context_demo(
+    request: Request,
     business_id: int | None = Query(default=None, ge=1),
     demo: int | None = Query(default=0),
     authorization: str | None = Header(default=None),
@@ -66,6 +75,11 @@ async def get_business_context_demo(
         bid = business_id or DEMO_BUSINESS_ID
         if bid != DEMO_BUSINESS_ID:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Business access denied")
+        if request.method in _WRITE_METHODS and not _demo_write_enabled():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Demo mode is read-only. Set SAHBUKTI_DEMO_WRITE=true to allow demo writes.",
+            )
         business = get_business(bid)
         if not business:
             business = {"id": DEMO_BUSINESS_ID, "name": "Demo Shop", "owner_whatsapp": None}

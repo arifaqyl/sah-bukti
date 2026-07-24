@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
+from pathlib import Path
 
 from app.api.dependencies import BusinessContext, get_business_context
 from app.schemas.payment_proof import (
@@ -61,6 +63,25 @@ def get_payment_proof_route(proof_id: int, ctx: BusinessContext = Depends(get_bu
         "proof": proof,
         "events": list_payment_proof_events(proof_id, ctx.business_id),
     }
+
+
+@router.get("/payment-proofs/{proof_id}/file")
+def download_payment_proof_file_route(
+    proof_id: int,
+    ctx: BusinessContext = Depends(get_business_context),
+):
+    """Serve the stored proof file only to the owning business. Replaces the
+    former public /uploads mount, which exposed receipts to anyone."""
+    proof = get_payment_proof(proof_id, ctx.business_id)
+    if not proof:
+        raise HTTPException(status_code=404, detail="Payment proof not found")
+    file_path = proof.get("file_path")
+    if not file_path:
+        raise HTTPException(status_code=404, detail="Proof has no attached file")
+    path = Path(file_path)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Proof file not found on disk")
+    return FileResponse(str(path))
 
 
 @router.post("/payment-proofs/{proof_id}/approve", response_model=PaymentProofResponse)

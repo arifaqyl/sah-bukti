@@ -1,4 +1,6 @@
 import asyncio
+import json
+import os
 
 from httpx import ASGITransport, AsyncClient
 
@@ -7,6 +9,12 @@ from app.main import create_app
 from app.services.auth import list_memberships
 from app.services.customers import create_customer
 from app.services.invoices import create_invoice, get_invoice
+
+
+def _proof_bytes(amount: float, reference: str, confidence: float = 0.99) -> bytes:
+    return json.dumps(
+        {"amount": amount, "reference": reference, "confidence": confidence, "paid_at": "2026-06-19T10:00:00+08:00"}
+    ).encode("utf-8")
 
 
 def _auth_headers(token: str) -> dict:
@@ -244,5 +252,78 @@ def test_patch_invoice_cannot_set_paid_status_without_proof():
             )
             assert sent.status_code == 200
             assert sent.json()["payment_status"] == "sent"
+
+    asyncio.run(run())
+
+
+def test_demo_mode_blocks_writes_by_default_and_allows_reads():
+    """Anonymous demo browsing stays read-only unless SAHBUKTI_DEMO_WRITE=true."""
+    async def run() -> None:
+        os.environ.pop("SAHBUKTI_DEMO_WRITE", None)
+        reset_db()
+        app = create_app()
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            reads = await client.get("/api/v1/invoices", params={"business_id": 1, "demo": 1})
+            assert reads.status_code == 200
+
+            delete_blocked = await client.delete(
+                "/api/v1/invoices/999", params={"business_id": 1, "demo": 1}
+            )
+            assert delete_blocked.status_code == 403
+
+            os.environ["SAHBUKTI_DEMO_WRITE"] = "true"
+            try:
+                delete_allowed = await client.delete(
+                    "/api/v1/invoices/999", params={"business_id": 1, "demo": 1}
+                )
+                assert delete_allowed.status_code == 404
+            finally:
+                os.environ.pop("SAHBUKTI_DEMO_WRITE", None)
+
+    asyncio.run(run())
+
+
+def test_uploads_not_public_and_proof_file_requires_ownership():
+    """The /uploads mount is gone; proof files are served only to the owner."""
+    async def run() -> None:
+        reset_db()
+        app = create_app()
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            public = await client.get("/uploads/payment_proofs/anything.png")
+            assert public.status_code == 404
+
+            token_a, business_a = await _signup(client, "uploads-a@example.com", "Uploads A")
+            token_b, business_b = await _signup(client, "uploads-b@example.com", "Uploads B")
+            invoice = _seed_invoice(business_a, "INV-UP-1", 25.0)
+
+            upload = await client.post(
+                "/api/v1/payment-proofs/upload",
+                headers=_auth_headers(token_a),
+                params={"business_id": business_a},
+                files={"file": ("proof.png", _proof_bytes(25.0, "UP-REF-1", confidence=0.5), "image/png")},
+                data={"invoice_id": str(invoice["id"])},
+            )
+            assert upload.status_code == 201
+            proof = upload.json()
+
+            own = await client.get(
+                f"/api/v1/payment-proofs/{proof['id']}/file",
+                headers=_auth_headers(token_a),
+                params={"business_id": business_a},
+            )
+            assert own.status_code == 200
+
+            cross = await client.get(
+                f"/api/v1/payment-proofs/{proof['id']}/file",
+                headers=_auth_headers(token_b),
+                params={"business_id": business_b},
+            )
+            assert cross.status_code == 404
+
+            anon = await client.get(
+                f"/api/v1/payment-proofs/{proof['id']}/file",
+                params={"business_id": business_a},
+            )
+            assert anon.status_code == 401
 
     asyncio.run(run())

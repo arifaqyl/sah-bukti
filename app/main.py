@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.dependencies import BusinessContext, require_owner_context
 from app.api.routes import auth, business_profile, businesses, customers, daily_close, demo, evidence, exports, health, inventory, invoices, month_end, parser, payment_proofs, payments, provision, reminders, review, whatsapp
-from app.config import BASE_DIR, UPLOADS_DIR
+from app.config import BASE_DIR
 from app.db.store import init_db
 from app.services.cron import run_daily_close, run_monthly_provision, start_scheduler, stop_scheduler
 
@@ -56,7 +56,9 @@ def create_app() -> FastAPI:
     frontend_dir = BASE_DIR / "frontend"
     frontend_dir.mkdir(exist_ok=True)
     frontend_assets_dir = frontend_dir / "assets"
-    app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+    # /uploads is intentionally NOT mounted publicly: payment-proof files are
+    # private to the owning business and served via the authed route
+    # GET /api/v1/payment-proofs/{proof_id}/file (ownership-checked).
     if frontend_assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(frontend_assets_dir)), name="frontend-assets")
 

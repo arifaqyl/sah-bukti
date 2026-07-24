@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
@@ -13,6 +14,11 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from app.db.store import DB_PATH, get_db
+
+
+# Demo owner WhatsApp is configurable via env so a real number never gets
+# baked into the repo. Default is an obviously-placeholder Malaysian number.
+DEMO_OWNER_WHATSAPP = os.getenv("SAHBUKTI_DEMO_OWNER_WHATSAPP", "60123456789")
 
 
 BAKERY_ITEMS = {
@@ -43,7 +49,7 @@ def ensure_business(conn):
             """,
             (
                 "Sah.Bukti Demo",
-                "60199798226",
+                DEMO_OWNER_WHATSAPP,
                 "baker",
                 "reviewable evidence for Malaysian micro-sellers",
                 "#D4A853",
@@ -61,7 +67,7 @@ def ensure_business(conn):
         WHERE id = ?
         """,
         (
-            "60199798226",
+            DEMO_OWNER_WHATSAPP,
             "reviewable evidence for Malaysian micro-sellers",
             "#D4A853",
             now,
