@@ -1,5 +1,7 @@
 import asyncio
 
+import pytest
+from freezegun import freeze_time
 from httpx import ASGITransport, AsyncClient
 
 from app.db.store import get_db, reset_db
@@ -7,6 +9,15 @@ from app.main import create_app
 from app.services.auth import list_memberships
 from app.services.customers import create_customer
 from app.services.invoices import create_invoice, get_invoice
+
+
+@pytest.fixture(autouse=True)
+def _freeze_to_june_2026():
+    # The CSV/import/approve flow seeds rows "now"; the June month-end
+    # readiness + accountant export filters by created_at <= period_end, so
+    # freeze "now" to late June so those rows are included in the June view.
+    with freeze_time("2026-06-30T23:30:00+00:00"):
+        yield
 
 
 def _auth_headers(token: str) -> dict:

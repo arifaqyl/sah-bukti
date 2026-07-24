@@ -1,6 +1,8 @@
 import asyncio
 import json
 
+import pytest
+from freezegun import freeze_time
 from httpx import ASGITransport, AsyncClient
 
 from app.db.store import reset_db
@@ -10,6 +12,16 @@ from app.services.auth import list_memberships
 from app.services.customers import create_customer
 from app.services.invoices import create_invoice
 from app.services.provision import ProvisionEngine
+
+
+@pytest.fixture(autouse=True)
+def _freeze_to_june_2026():
+    # These tests seed invoices "now" and then query the June 2026 provision
+    # month; the engine filters created_at <= month_end, so freeze "now" to
+    # late June so freshly seeded rows land inside the period. Keeps the suite
+    # green as the real calendar advances.
+    with freeze_time("2026-06-30T23:30:00+00:00"):
+        yield
 
 
 def _seed_bucket_invoices(business_id: int = 1) -> None:

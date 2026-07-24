@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+from freezegun import freeze_time
 from httpx import ASGITransport, AsyncClient
 
 from app.db.store import get_db, reset_db
@@ -10,6 +11,16 @@ from app.services.cron import run_daily_close, run_monthly_provision
 from app.services.customers import create_customer
 from app.services.inventory import create_ingredient
 from app.services.invoices import create_invoice
+
+
+@pytest.fixture(autouse=True)
+def _freeze_to_june_2026():
+    # Freeze "now" to late June 2026 so rows seeded during the test (via
+    # create_invoice / the API) land inside the June period the cron/provision
+    # queries target (created_at <= month_end). Daily-close tests pass an
+    # explicit close_date and paid_at, so they are unaffected by the freeze.
+    with freeze_time("2026-06-30T23:30:00+00:00"):
+        yield
 
 
 def _signup_owner(client: AsyncClient) -> str:
