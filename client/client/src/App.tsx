@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router as WouterRouter } from "wouter";
+import { APP_BASE } from "@/lib/paths";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -31,7 +32,8 @@ function guard(Component: React.ComponentType) {
 
 function Router() {
   return (
-    <Switch>
+    <WouterRouter base={APP_BASE}>
+      <Switch>
       <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={guard(Dashboard)} />
@@ -46,7 +48,8 @@ function Router() {
       <Route path="/help" component={guard(Help)} />
       <Route path="/profile" component={guard(Profile)} />
       <Route component={NotFound} />
-    </Switch>
+      </Switch>
+    </WouterRouter>
   );
 }
 

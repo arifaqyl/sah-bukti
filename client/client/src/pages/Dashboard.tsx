@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { currency } from "@/lib/sahbukti";
 import { Plus, ArrowRight, Inbox, CheckCircle2, MessageCircle, X, BookOpen, Loader2, ShieldCheck, Send, Database } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/paths";
 
 const WELCOME_KEY = "sahbukti_welcome_dismissed";
 
@@ -54,12 +55,12 @@ export default function Dashboard() {
     try {
       const query = currentBusinessQuery();
       const [proofRes, invoiceRes, customerRes, inventoryRes, readinessRes, sessionRes] = await Promise.all([
-        fetch(`/api/v1/review/payment-proofs?review_state=needs_review&${query}`, { headers: authHeaders(), credentials: "include" }),
-        fetch(`/api/v1/invoices?${query}`, { headers: authHeaders(), credentials: "include" }),
-        fetch(`/api/v1/customers?${query}`, { headers: authHeaders(), credentials: "include" }),
-        fetch(`/api/v1/inventory/ingredients?${query}`, { headers: authHeaders(), credentials: "include" }),
-        fetch(`/api/v1/month-end/readiness?month=${month}&${query}`, { headers: authHeaders(), credentials: "include" }),
-        fetch(`/api/v1/whatsapp/session?demo=1`),
+        fetch(`${API_BASE}/review/payment-proofs?review_state=needs_review&${query}`, { headers: authHeaders(), credentials: "include" }),
+        fetch(`${API_BASE}/invoices?${query}`, { headers: authHeaders(), credentials: "include" }),
+        fetch(`${API_BASE}/customers?${query}`, { headers: authHeaders(), credentials: "include" }),
+        fetch(`${API_BASE}/inventory/ingredients?${query}`, { headers: authHeaders(), credentials: "include" }),
+        fetch(`${API_BASE}/month-end/readiness?month=${month}&${query}`, { headers: authHeaders(), credentials: "include" }),
+        fetch(`${API_BASE}/whatsapp/session?demo=1`),
       ]);
 
       const proofs = proofRes.ok ? await proofRes.json() : [];
@@ -95,7 +96,7 @@ export default function Dashboard() {
   const seedDemo = async () => {
     setDemoLoading(true);
     try {
-      const response = await fetch("/api/v1/demo/seed?demo=1", { method: "POST" });
+      const response = await fetch(`${API_BASE}/demo/seed?demo=1`, { method: "POST" });
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         throw new Error(payload?.detail || `Demo seed failed (${response.status})`);
@@ -116,7 +117,7 @@ export default function Dashboard() {
     }
     setWaLoading(true);
     try {
-      const response = await fetch(`/api/v1/whatsapp/agent/command?demo=1`, {
+      const response = await fetch(`${API_BASE}/whatsapp/agent/command?demo=1`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ from_phone: waPhone.trim(), message: waMessage.trim() }),

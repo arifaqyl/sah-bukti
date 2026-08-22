@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Panel, Badge, ListRow } from "@/components/sahbukti-ui";
 import { currency } from "@/lib/sahbukti";
+import { API_BASE } from "@/lib/paths";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,7 +38,7 @@ export default function Readiness() {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/v1/month-end/readiness?month=${month}&${currentBusinessQuery()}`, {
+        const res = await fetch(`${API_BASE}/month-end/readiness?month=${month}&${currentBusinessQuery()}`, {
           headers: { Accept: "application/json", ...authHeaders() },
           credentials: "include",
         });

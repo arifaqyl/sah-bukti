@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Panel } from "@/components/sahbukti-ui";
 import { Download, FileJson, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/paths";
 
 function buildMonthOptions() {
   const formatter = new Intl.DateTimeFormat("en-MY", { month: "long", year: "numeric" });
@@ -23,7 +24,7 @@ export default function Export() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/exports/accountant?month=${encodeURIComponent(month)}&include_proof_payloads=false&format=${format}&demo=1`, {
+      const res = await fetch(`${API_BASE}/exports/accountant?month=${encodeURIComponent(month)}&include_proof_payloads=false&format=${format}&demo=1`, {
         headers: { Accept: format === "json" ? "application/json" : "text/csv" },
         credentials: "include",
         cache: "no-store",

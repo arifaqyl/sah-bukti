@@ -1,0 +1,15 @@
+---
+description: Python automation conventions for bots, scrapers, and scripts on D drive.
+globs: **/*.py
+alwaysApply: false
+---
+
+# Python on D:\
+
+- Match existing project style before adding patterns
+- Prefer stdlib + existing deps over new packages
+- `pip` is the default package manager
+- Keep scripts runnable from repo root
+- Use env vars or vault secrets — never hardcode tokens
+- For long-running bots: log clearly, fail safe, avoid silent swallow
+- ffmpeg / Whisper paths: check project note in `D:\MyVault\Projects/`

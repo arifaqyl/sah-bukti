@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Panel, Badge, EmptyState } from "@/components/sahbukti-ui";
 import { currency } from "@/lib/sahbukti";
+import { API_BASE } from "@/lib/paths";
 import { Check, ChevronDown, ChevronUp, FileText, Inbox, Loader2, Pencil, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,7 +41,7 @@ export default function Review() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/review/payment-proofs?review_state=needs_review&${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/review/payment-proofs?review_state=needs_review&${currentBusinessQuery()}`, {
         headers: { Accept: "application/json", ...authHeaders() },
         credentials: "include",
       });
@@ -87,7 +88,7 @@ export default function Review() {
     }
     setProcessing(String(id));
     try {
-      const endpoint = approve ? `/api/v1/review/${id}/approve` : `/api/v1/review/${id}/reject`;
+      const endpoint = approve ? `${API_BASE}/review/${id}/approve` : `${API_BASE}/review/${id}/reject`;
       const res = await fetch(`${endpoint}?${currentBusinessQuery()}`, {
         method: "POST",
         headers: {
@@ -127,7 +128,7 @@ export default function Review() {
   const saveEdit = async (proofId: number) => {
     setProcessing(`edit-${proofId}`);
     try {
-      const res = await fetch(`/api/v1/review/${proofId}?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/review/${proofId}?${currentBusinessQuery()}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { Panel, Badge, StatCard } from "@/components/sahbukti-ui";
 import { currency } from "@/lib/sahbukti";
 import { Plus, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/paths";
 
 interface Ingredient {
   id: number;
@@ -52,11 +53,11 @@ export default function Inventory() {
     try {
       const query = currentBusinessQuery();
       const [itemRes, supplierRes] = await Promise.all([
-        fetch(`/api/v1/inventory/ingredients?${query}`, {
+        fetch(`${API_BASE}/inventory/ingredients?${query}`, {
           headers: { Accept: "application/json", ...authHeaders() },
           credentials: "include",
         }),
-        fetch(`/api/v1/inventory/suppliers?${query}`, {
+        fetch(`${API_BASE}/inventory/suppliers?${query}`, {
           headers: { Accept: "application/json", ...authHeaders() },
           credentials: "include",
         }),
@@ -89,7 +90,7 @@ export default function Inventory() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/v1/inventory/ingredients?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/inventory/ingredients?${currentBusinessQuery()}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,7 +157,7 @@ export default function Inventory() {
       }
       setSubmitting(true);
       try {
-        const res = await fetch(`/api/v1/inventory/ingredients/${editingId}?${currentBusinessQuery()}`, {
+        const res = await fetch(`${API_BASE}/inventory/ingredients/${editingId}?${currentBusinessQuery()}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -192,7 +193,7 @@ export default function Inventory() {
   const removeIngredient = async (ingredientId: number) => {
     setDeletingId(ingredientId);
     try {
-      const res = await fetch(`/api/v1/inventory/ingredients/${ingredientId}?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/inventory/ingredients/${ingredientId}?${currentBusinessQuery()}`, {
         method: "DELETE",
         headers: authHeaders(),
         credentials: "include",

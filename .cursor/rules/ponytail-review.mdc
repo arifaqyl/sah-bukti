@@ -1,0 +1,20 @@
+---
+description: Over-engineering review. Use when asked to review, simplify, or audit bloat.
+alwaysApply: false
+---
+
+# Ponytail Review
+
+Review for unnecessary complexity only. Goal: shorter diff.
+
+Format — one line per finding:
+`L<line>: <tag> <what>. <replacement>.`
+
+Tags:
+- `delete:` dead code, unused flexibility — replacement: nothing
+- `stdlib:` hand-rolled stdlib — name the function
+- `native:` dependency for platform feature — name the feature
+- `yagni:` abstraction with one impl — inline until second exists
+- `shrink:` same logic, fewer lines — show shorter form
+
+Do not nitpick style. Do not suggest rewrites that add lines.

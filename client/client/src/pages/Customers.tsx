@@ -4,6 +4,7 @@ import { Panel, StatCard } from "@/components/sahbukti-ui";
 import { currency } from "@/lib/sahbukti";
 import { Plus, Phone, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/paths";
 
 interface Customer {
   id: number;
@@ -38,7 +39,7 @@ export default function Customers() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/customers?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/customers?${currentBusinessQuery()}`, {
         headers: { Accept: "application/json", ...authHeaders() },
         credentials: "include",
       });
@@ -65,7 +66,7 @@ export default function Customers() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/v1/customers?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/customers?${currentBusinessQuery()}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +117,7 @@ export default function Customers() {
     if (editingId !== null) {
       setSubmitting(true);
       try {
-        const res = await fetch(`/api/v1/customers/${editingId}?${currentBusinessQuery()}`, {
+        const res = await fetch(`${API_BASE}/customers/${editingId}?${currentBusinessQuery()}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -149,7 +150,7 @@ export default function Customers() {
   const removeCustomer = async (customerId: number) => {
     setDeletingId(customerId);
     try {
-      const res = await fetch(`/api/v1/customers/${customerId}?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/customers/${customerId}?${currentBusinessQuery()}`, {
         method: "DELETE",
         headers: authHeaders(),
         credentials: "include",

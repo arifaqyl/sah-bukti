@@ -1,4 +1,6 @@
-const API_BASE = "/api/v1";
+import { API_BASE } from "./paths";
+
+export { API_BASE } from "./paths";
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_BASE}${path}`, {

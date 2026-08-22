@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Panel, Badge, ListRow } from "@/components/sahbukti-ui";
 import { MessageSquareText, FileSpreadsheet, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/paths";
 
 const RECENT = [
   { src: "WhatsApp", text: "dah bayar for the last order", time: "2 min ago", tone: "warn" as const, status: "Parsed" },
@@ -20,7 +21,7 @@ export default function Evidence() {
     const useDemo = !token || !businessId;
     const query = useDemo ? "demo=1" : `business_id=${encodeURIComponent(businessId)}`;
 
-    const response = await fetch(`/api/v1${path}?${query}`, {
+    const response = await fetch(`${API_BASE}${path}?${query}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,0 +1,36 @@
+---
+description: Arif Aqyl defaults — vault brain, stack, git, shell, concise agent behavior.
+alwaysApply: true
+---
+
+# Aqyl Core
+
+## Brain
+- Vault root: `D:\MyVault\`
+- For non-trivial repo work: read `D:\MyVault\AGENTS.md` → `INDEX.md` → relevant project note
+- Secrets only in `D:\MyVault\SECRETS.md` when truly needed
+- Update vault project notes when stable workflow or architecture changes
+
+## Stack
+- Python first for automation, bots, scripting
+- Vanilla HTML/CSS/JS before frameworks; no Tailwind unless asked
+- PowerShell on Windows; `$env:VAR = 'value'`; use `;` not `&&`
+- SSH to DigitalOcean via Python paramiko only — never PowerShell SSH
+- Main work lives on `D:\`
+
+## Git
+- Author: `arifaqyl <hello@arifaqyl.me>`
+- No Co-Authored-By trailers
+- No `--no-verify`, no force push to main
+- Imperative lowercase commit messages
+
+## Agent behavior
+- Concise by default; expand only for risk, complexity, or explicit ask
+- Use installed skills when they clearly match
+- Inspect → implement → verify → tighten
+- One task, one branch/worktree when possible
+- Review diffs; manual check on auth, payments, security
+
+## Copy
+- No cursing in terminal output
+- Professional terminal output; grounded KL context in user-facing copy only

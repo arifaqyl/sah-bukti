@@ -5,6 +5,7 @@ import { ListRow, Badge, Panel } from "@/components/sahbukti-ui";
 import { currency } from "@/lib/sahbukti";
 import { Plus, Loader2, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE, appPath } from "@/lib/paths";
 
 interface Invoice {
   id: number;
@@ -64,11 +65,11 @@ export default function Invoices() {
     try {
       const query = currentBusinessQuery();
       const [invoiceRes, customerRes] = await Promise.all([
-        fetch(`/api/v1/invoices?${query}`, {
+        fetch(`${API_BASE}/invoices?${query}`, {
           headers: { Accept: "application/json", ...authHeaders() },
           credentials: "include",
         }),
-        fetch(`/api/v1/customers?${query}`, {
+        fetch(`${API_BASE}/customers?${query}`, {
           headers: { Accept: "application/json", ...authHeaders() },
           credentials: "include",
         }),
@@ -111,7 +112,7 @@ export default function Invoices() {
 
       let customer = customers.find((entry) => entry.name.toLowerCase() === customerName.trim().toLowerCase());
       if (!customer) {
-        const customerRes = await fetch(`/api/v1/customers?${query}`, {
+        const customerRes = await fetch(`${API_BASE}/customers?${query}`, {
           method: "POST",
           headers,
           credentials: "include",
@@ -130,7 +131,7 @@ export default function Invoices() {
 
       const qty = Number(quantity);
       const price = Number(unitPrice);
-      const invoiceRes = await fetch(`/api/v1/invoices?${query}`, {
+      const invoiceRes = await fetch(`${API_BASE}/invoices?${query}`, {
         method: "POST",
         headers,
         credentials: "include",
@@ -172,7 +173,7 @@ export default function Invoices() {
   const deleteInvoice = async (invoiceId: number) => {
     setDeletingId(invoiceId);
     try {
-      const res = await fetch(`/api/v1/invoices/${invoiceId}?${currentBusinessQuery()}`, {
+      const res = await fetch(`${API_BASE}/invoices/${invoiceId}?${currentBusinessQuery()}`, {
         method: "DELETE",
         headers: authHeaders(),
         credentials: "include",
@@ -314,7 +315,7 @@ export default function Invoices() {
                   trailing={
                     <div className="flex items-center gap-2">
                       <a
-                        href={`/api/v1/invoices/${r.id}/receipt?${currentBusinessQuery()}`}
+                        href={`${API_BASE}/invoices/${r.id}/receipt?${currentBusinessQuery()}`}
                         onClick={(event) => event.stopPropagation()}
                         className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/40 hover:text-foreground"
                       >

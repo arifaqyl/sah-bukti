@@ -8,6 +8,7 @@ import { Panel, Badge } from "@/components/sahbukti-ui";
 import { Link } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/paths";
 import {
   Check,
   MessageCircle,
@@ -213,8 +214,8 @@ export default function Help() {
     setWaLoading(true);
     try {
       const [sessionRes, qrRes] = await Promise.all([
-        fetch("/api/v1/whatsapp/session?demo=1"),
-        fetch("/api/v1/whatsapp/session/qr?demo=1"),
+        fetch(`${API_BASE}/whatsapp/session?demo=1`),
+        fetch(`${API_BASE}/whatsapp/session/qr?demo=1`),
       ]);
       const session = await sessionRes.json();
       const qr = await qrRes.json();
@@ -237,7 +238,7 @@ export default function Help() {
   const seedDemo = async () => {
     setDemoLoading(true);
     try {
-      const response = await fetch("/api/v1/demo/seed?demo=1", { method: "POST" });
+      const response = await fetch(`${API_BASE}/demo/seed?demo=1`, { method: "POST" });
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         throw new Error(payload?.detail || `Demo seed failed (${response.status})`);

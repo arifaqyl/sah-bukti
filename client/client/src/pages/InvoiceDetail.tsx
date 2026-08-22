@@ -5,6 +5,7 @@ import { Panel, Badge } from "@/components/sahbukti-ui";
 import { currency } from "@/lib/sahbukti";
 import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE, appPath } from "@/lib/paths";
 
 interface InvoiceDetailRecord {
   id: number;
@@ -42,7 +43,7 @@ export default function InvoiceDetail() {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/v1/invoices/${id}?${currentBusinessQuery()}`, {
+        const res = await fetch(`${API_BASE}/invoices/${id}?${currentBusinessQuery()}`, {
           headers: { Accept: "application/json", ...authHeaders() },
           credentials: "include",
         });
@@ -130,7 +131,7 @@ export default function InvoiceDetail() {
             <Panel title="Actions">
               <div className="flex flex-col gap-3">
                 <a
-                  href={`/api/v1/invoices/${invoice.id}/receipt?${currentBusinessQuery()}`}
+                  href={`${API_BASE}/invoices/${invoice.id}/receipt?${currentBusinessQuery()}`}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-transform hover:-translate-y-0.5 active:scale-[0.97]"
                 >
                   <Download className="h-4 w-4" />
