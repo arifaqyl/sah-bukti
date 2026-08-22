@@ -28,6 +28,16 @@ BILLPLZ_CALLBACK_PATH = os.getenv("BILLPLZ_CALLBACK_PATH", "/api/v1/payments/bil
 BILLPLZ_REDIRECT_PATH = os.getenv("BILLPLZ_REDIRECT_PATH", "/pay.html")
 BILLPLZ_X_SIGNATURE_KEY = os.getenv("BILLPLZ_X_SIGNATURE_KEY", "")
 
+# Explicit CORS allowlist. Never "*" with credentials; same-origin deployments need nothing here.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "SAHBUKTI_CORS_ORIGINS",
+        "https://arifaqyl.me,http://127.0.0.1:8000,http://localhost:8000",
+    ).split(",")
+    if origin.strip()
+]
+
 # Uploads directory for receipt screenshots
 UPLOADS_DIR = DATA_DIR / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)

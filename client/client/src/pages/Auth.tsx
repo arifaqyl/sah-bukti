@@ -144,7 +144,7 @@ export default function Auth() {
                   Log in to Sah.Bukti
                 </button>
                 <p className="text-center text-xs text-muted-foreground">
-                  Demo: any email + password works.
+                  Demo workspace: sign-in is instant and local. Your data lives in this deployment's demo database, not a real multi-tenant account.
                 </p>
               </form>
             ) : (
@@ -262,6 +262,8 @@ export default function Auth() {
             )}
           </div>
           <p className="mt-5 text-center text-xs text-muted-foreground">
+            Demo workspace — sign-up creates a local demo shell, not a hosted tenant account.
+            <br />
             Evidence never auto-pays. Payment proofs stay reviewable until you approve.
           </p>
         </div>

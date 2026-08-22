@@ -4,12 +4,13 @@ import logging
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.dependencies import BusinessContext, require_owner_context
 from app.api.routes import auth, business_profile, businesses, customers, daily_close, demo, evidence, exports, health, inventory, invoices, month_end, parser, payment_proofs, payments, provision, reminders, review, whatsapp
-from app.config import BASE_DIR
+from app.config import BASE_DIR, CORS_ORIGINS
 from app.db.store import init_db
 from app.services.cron import run_daily_close, run_monthly_provision, start_scheduler, stop_scheduler
 
@@ -33,6 +34,14 @@ def create_app() -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+    if CORS_ORIGINS:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=CORS_ORIGINS,
+            allow_credentials=False,
+            allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+            allow_headers=["Authorization", "Content-Type"],
+        )
     app.include_router(health.router, prefix="/health", tags=["health"])
     app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
     app.include_router(businesses.router, prefix="/api/v1", tags=["businesses"])

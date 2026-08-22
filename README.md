@@ -4,7 +4,7 @@ Proof before payment. Clean books after.
 
 Sah.Bukti is a WhatsApp-first collections control plane for Malaysian micro-sellers. It turns messy order and payment messages into structured evidence, routes them through review, and updates ledger truth only after owner approval.
 
-Live product: `https://arifaqyl.me/frontend/`
+Live demo: `https://arifaqyl.me/sahbukti/` (read-only browsing by default; writes need `SAHBUKTI_DEMO_WRITE=true` on the deployment)
 
 ## Why it exists
 
@@ -60,13 +60,8 @@ month-end readiness
 
 ## Product screens
 
-| Evidence intake | Review gate |
-| --- | --- |
-| ![Evidence intake](docs/screenshots/evidence.jpg) | ![Review queue](docs/screenshots/review.png) |
-
-| Invoices | Accountant export |
-| --- | --- |
-| ![Invoices](docs/screenshots/invoices.jpg) | ![Accountant export](docs/screenshots/export.jpg) |
+Real screenshots are pending capture (see the project plan). Run locally to see:
+dashboard, review queue, invoices, month-end readiness, and accountant export.
 
 ## Stack
 
@@ -115,7 +110,7 @@ node scripts/whatsapp_bridge.js
 Open:
 
 ```text
-http://127.0.0.1:8000/frontend/
+http://127.0.0.1:8000/
 ```
 
 ## Notes
